@@ -48,9 +48,9 @@ html, body {
   background: var(--bg-dark);
 }
 
-/* Mathematical Geometry Blueprint Overlay (Beside & On Top of Connection Margins) */
+/* Mathematical Geometry Blueprint Overlay (Passes Behind & Through Image Layers) */
 #geometry-canvas {
-  z-index: 38;
+  z-index: 12;
   pointer-events: none;
   filter: drop-shadow(0 0 12px rgba(245, 208, 97, 0.45)) drop-shadow(0 0 20px rgba(78, 240, 208, 0.25));
 }
@@ -152,6 +152,7 @@ html, body {
   margin-top: 2px;
   background: linear-gradient(135deg, #ffffff 0%, var(--gold-accent) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

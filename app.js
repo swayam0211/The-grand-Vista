@@ -366,131 +366,295 @@ document.addEventListener('DOMContentLoaded', () => {
     geomCanvas.height = 3300; // Covers Y = 3300px to 6600px
 
     let geomProgress = 0;
+    let animTime = 0;
 
+    // Exact Custom Color Palette (From User's Code Editor Screenshot)
+    const PALETTE = {
+      cyan: '#414219ff',
+      cyanGlow: 'rgba(4, 66, 69, 0.95)',
+      gold: '#054701ff',
+      goldGlow: 'rgba(36, 34, 5, 0.95)',
+      rose: '#485304ff',
+      roseGlow: 'rgba(74, 62, 2, 0.9)',
+      amber: '#503104ff',
+      amberGlow: 'rgba(121, 75, 5, 0.9)',
+      mint: '#056344ff',
+      cardBg: 'rgba(6, 16, 32, 0.88)'
+    };
+
+    // ScrollTrigger starts 0.52s faster / earlier (start: s(2100))
     ScrollTrigger.create({
       trigger: mainTrigger,
-      start: s(3100),
+      start: s(2100),
       end: s(6600),
       scrub: true,
       onUpdate: (self) => {
         geomProgress = self.progress;
-        drawMathematicalGeometry(geomProgress);
       }
     });
 
-    function drawMathematicalGeometry(progress) {
+    function geomLoop() {
+      animTime += 0.016;
+      drawMathematicalGeometry(geomProgress, animTime);
+      requestAnimationFrame(geomLoop);
+    }
+    requestAnimationFrame(geomLoop);
+
+    function drawMathematicalGeometry(progress, time) {
       ctxG.clearRect(0, 0, geomCanvas.width, geomCanvas.height);
-      ctxG.lineWidth = 1.4;
 
-      // Focal Node Coordinates beside image connection margins (Local canvas Y = global Y - 3300)
-      const citadelNode = { x: 880, y: 3750 - 3300, name: "CITADEL APEX // 3787px" };     // Beside Citadel (right side)
-      const minaretNode = { x: 280, y: 4910 - 3300, name: "MINARET SPIRE // 4900px" };     // Beside Minaret (left side)
-      const skylineNode = { x: 1220, y: 4980 - 3300, name: "EUROPEAN DOME // 4950px" };   // Beside Skyline (right side)
-      const roadNode = { x: 720, y: 5900 - 3300, name: "ROAD BASE // 5900px" };         // Center Road Base
+      const pathProgress = Math.min(1.0, progress * 1.35);
 
-      // Angle & Rotation Progress
-      const angle = progress * Math.PI * 10;
-      const pathProgress = Math.min(1.0, progress * 1.4);
+      // ------------------------------------------------------------------------
+      // 1. STAGE 1: TORNADO VORTEX SPIRAL FUNNEL (USER'S 2nd IMAGE RECREATION)
+      // 5 Streams from Bridge Pillars enter a 3D Swirling Tornado Funnel taper!
+      // ------------------------------------------------------------------------
+      const pillars = [
+        { start: { x: 184, y: 167 }, color: PALETTE.cyan, glow: PALETTE.cyanGlow, phase: 0 },
+        { start: { x: 447, y: 167 }, color: PALETTE.gold, glow: PALETTE.goldGlow, phase: 1.25 },
+        { start: { x: 702, y: 167 }, color: PALETTE.rose, glow: PALETTE.roseGlow, phase: 2.50 },
+        { start: { x: 953, y: 167 }, color: PALETTE.amber, glow: PALETTE.amberGlow, phase: 3.75 },
+        { start: { x: 1210, y: 165 }, color: PALETTE.mint, glow: PALETTE.cyanGlow, phase: 5.00 }
+      ];
 
-      // 1. DUAL MULTI-STRAND GLOWING BEZIER CONNECTORS (Beside building margins)
-      // Citadel -> Minaret Connection Cable (Gold + Cyan)
-      drawGlowBezier(ctxG, citadelNode, { x: 780, y: 950 }, { x: 400, y: 1280 }, minaretNode, pathProgress, '#f5d061', '#035041ff');
+      // Draw Tornado Funnel Strands (Image 2)
+      pillars.forEach((p, idx) => {
+        drawTornadoVortexStream(ctxG, p.start, idx, pathProgress, time, p.color, p.glow, p.phase);
+      });
 
-      // Minaret -> Skyline Connection Cable (Amber + Gold)
-      drawGlowBezier(ctxG, minaretNode, { x: 500, y: 1650 }, { x: 950, y: 1670 }, skylineNode, pathProgress, '#603003ff', '#4f3d05ff');
+      // ------------------------------------------------------------------------
+      // 2. STAGE 2: SWEEPING 3D CURVED RIBBON WAVE WITH BEAD DOTS (USER'S 1st IMAGE RECREATION)
+      // Passing behind Citadel -> Emerge Bottom-Right -> U-Curve Left -> Behind Minaret -> Road Base
+      // (PRESERVED EXACT PATH WAYPOINTS UNTOUCHED)
+      // ------------------------------------------------------------------------
+      if (pathProgress > 0.32) {
+        const waveProgress = Math.min(1.0, (pathProgress - 0.32) * 1.6);
+        drawSweepingRibbonWave(ctxG, waveProgress, time);
+      }
 
-      // Skyline -> Road Base Connection Cable
-      drawGlowBezier(ctxG, skylineNode, { x: 1100, y: 2100 }, { x: 900, y: 2450 }, roadNode, pathProgress, '#095848ff', '#502d0cff');
+      // ------------------------------------------------------------------------
+      // 3. FOCAL NODES & HUD BADGE CARDS
+      // ------------------------------------------------------------------------
+      const nodes = {
+        citadel: { x: 1060, y: 1200, title: "CITADEL APEX", code: "3787px • 42.8° N", color: PALETTE.gold, glow: PALETTE.goldGlow },
+        minaretLeft: { x: 160, y: 1600, title: "MINARET SPIRE", code: "4900px • 18.4° E", color: PALETTE.rose, glow: PALETTE.roseGlow },
+        skyline: { x: 1280, y: 1650, title: "EUROPEAN DOME", code: "4950px • 64.2° W", color: PALETTE.cyan, glow: PALETTE.cyanGlow },
+        roadBase: { x: 650, y: 2450, title: "ROAD BASE", code: "5900px • ELEV 0m", color: PALETTE.mint, glow: PALETTE.cyanGlow }
+      };
 
-      // 2. VIBRANT SPIROGRAPHIC ROTATING ORBITAL GEAR RINGS
-      drawSpirograph(ctxG, citadelNode.x, citadelNode.y, 140, 42, 35, angle, 'rgba(90, 68, 1, 0.82)', 'rgba(2, 68, 55, 0.45)');
-      drawSpirograph(ctxG, minaretNode.x, minaretNode.y, 150, 45, 38, -angle * 1.3, 'rgba(156, 163, 209, 0.85)', 'rgba(92, 78, 29, 0.5)');
-      drawSpirograph(ctxG, skylineNode.x, skylineNode.y, 130, 39, 30, angle * 1.1, 'rgba(11, 4, 77, 0.85)', 'rgba(98, 75, 4, 0.45)');
+      if (pathProgress > 0.4) {
+        drawEpicycloidGear(ctxG, nodes.citadel.x, nodes.citadel.y, 130, 39, 30, time * 0.6, PALETTE.gold, PALETTE.cyan);
+        drawEpicycloidGear(ctxG, nodes.minaretLeft.x, nodes.minaretLeft.y, 120, 36, 28, -time * 0.8, PALETTE.rose, PALETTE.amber);
+        drawEpicycloidGear(ctxG, nodes.skyline.x, nodes.skyline.y, 135, 40, 32, time * 0.7, PALETTE.cyan, PALETTE.mint);
+        drawEpicycloidGear(ctxG, nodes.roadBase.x, nodes.roadBase.y, 125, 38, 29, -time * 0.5, PALETTE.mint, PALETTE.gold);
 
-      // 3. ARCHITECTURAL COMPASS DEGREE ARCS & TICK MARKS
-      [citadelNode, minaretNode, skylineNode].forEach((node, idx) => {
-        const sweepAngle = Math.min(Math.PI * 2, progress * Math.PI * 3.5 + idx * 0.4);
-
-        ctxG.strokeStyle = idx % 2 === 0 ? 'rgba(245, 208, 97, 0.50)' : 'rgba(78, 240, 208, 0.50)';
-        ctxG.setLineDash([8, 4]);
-
-        [120, 180, 250].forEach(r => {
-          ctxG.beginPath();
-          ctxG.arc(node.x, node.y, r, 0, sweepAngle);
-          ctxG.stroke();
+        Object.values(nodes).forEach((node) => {
+          drawHUDNodeBadge(ctxG, node, time);
         });
+      }
+    }
 
-        // Compass Tick Marks
-        ctxG.setLineDash([]);
-        ctxG.strokeStyle = 'rgba(245, 208, 97, 0.65)';
-        for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
-          if (a <= sweepAngle) {
-            const tx1 = node.x + Math.cos(a) * 170;
-            const ty1 = node.y + Math.sin(a) * 170;
-            const tx2 = node.x + Math.cos(a) * 180;
-            const ty2 = node.y + Math.sin(a) * 180;
-            ctxG.beginPath();
-            ctxG.moveTo(tx1, ty1);
-            ctxG.lineTo(tx2, ty2);
-            ctxG.stroke();
+    // --- STAGE 1: TORNADO VORTEX FUNNEL (IMAGE 2 RECREATION) ---
+    function drawTornadoVortexStream(ctx, startPt, idx, progress, time, color, glowColor, phase) {
+      if (progress <= 0) return;
+
+      const steps = 140;
+      const maxSteps = Math.floor(steps * progress);
+
+      ctx.save();
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 4;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+
+      let headPt = startPt;
+      const beadPositions = [];
+
+      for (let step = 0; step <= maxSteps; step++) {
+        const u = step / steps;
+        let x, y;
+
+        if (u < 0.22) {
+          // Entry stream from bridge pillar base
+          const entryT = u / 0.22;
+          x = startPt.x + (680 + (idx - 2) * 120 - startPt.x) * entryT * entryT;
+          y = startPt.y + (220 - startPt.y) * entryT;
+        } else {
+          // 3D Tornado Funnel Spiral (Wide top funnel tapering down to tight core - Image 2)
+          const funnelT = (u - 0.22) / 0.78;
+          const funnelY = 220 + funnelT * 420;
+
+          // Funnel Radius Taper: 190px top down to 28px bottom core
+          const funnelRadius = (190 * (1.0 - funnelT)) + 28;
+
+          // 3D Rotation Angle around Tornado Axis
+          const angle = funnelT * Math.PI * 16 + phase + time * 2.2;
+
+          // 3D Perspective Projection (Perspective tilt)
+          const rx = funnelRadius * Math.cos(angle);
+          const ry = funnelRadius * Math.sin(angle) * 0.38;
+
+          x = 680 + rx;
+          y = funnelY + ry;
+
+          // Record positions for orbiting particle beads along tornado rings (Image 2)
+          if (step % 12 === 0) {
+            beadPositions.push({ x, y, size: 3.5 + (1.0 - funnelT) * 2.5 });
           }
         }
+
+        if (step === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+
+        if (step === maxSteps) {
+          headPt = { x, y };
+        }
+      }
+      ctx.stroke();
+
+      // Draw Orbiting Particle Beads along Tornado Funnel (Image 2)
+      beadPositions.forEach(b => {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
+        ctx.fill();
       });
 
-      // 4. METRIC FOCAL CALLOUT LABELS & GLOWING CROSSHAIRS
-      [citadelNode, minaretNode, skylineNode, roadNode].forEach(node => {
-        // Glowing Center Node
-        ctxG.fillStyle = '#ffffff';
-        ctxG.beginPath();
-        ctxG.arc(node.x, node.y, 5, 0, Math.PI * 2);
-        ctxG.fill();
+      // Leading Snake Head Circle Dot
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(headPt.x, headPt.y, 4.5, 0, Math.PI * 2);
+      ctx.fill();
 
-        ctxG.strokeStyle = 'rgba(73, 48, 3, 0.9)';
-        ctxG.lineWidth = 1.5;
-        ctxG.beginPath();
-        ctxG.arc(node.x, node.y, 9, 0, Math.PI * 2);
-        ctxG.stroke();
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(headPt.x, headPt.y, 7.5, 0, Math.PI * 2);
+      ctx.fill();
 
-        // Crosshairs
-        ctxG.strokeStyle = 'rgba(200, 156, 36, 0.7)';
-        ctxG.beginPath();
-        ctxG.moveTo(node.x - 24, node.y); ctxG.lineTo(node.x + 24, node.y);
-        ctxG.moveTo(node.x, node.y - 24); ctxG.lineTo(node.x, node.y + 24);
-        ctxG.stroke();
-
-        // Architectural Monospace Text Label
-        ctxG.font = '11px "Inter", monospace';
-        ctxG.fillStyle = '#02223eff';
-        ctxG.fillText(node.name, node.x + 14, node.y - 12);
-      });
+      ctx.restore();
     }
 
-    function drawGlowBezier(ctx, p0, p1, p2, p3, t, mainColor, glowColor) {
-      // Primary Cable
-      ctx.strokeStyle = mainColor;
-      ctx.lineWidth = 2.2;
-      ctx.setLineDash([]);
-      drawPartialBezier(ctx, p0, p1, p2, p3, t);
+    // --- STAGE 2: SWEEPING 3D CURVED RIBBON WAVE WITH BEAD DOTS (IMAGE 1 RECREATION) ---
+    function drawSweepingRibbonWave(ctx, progress, time) {
+      const waypoints = [
+        { x: 680, y: 640 },
+        { x: 650, y: 950 },
+        { x: 1080, y: 1200 },
+        { x: 260, y: 1550 },
+        { x: 520, y: 1950 },
+        { x: 650, y: 2450 }
+      ];
 
-      // Offset Parallel Glow Cable
-      ctx.strokeStyle = glowColor;
-      ctx.lineWidth = 1.2;
-      ctx.setLineDash([4, 4]);
-      drawPartialBezier(ctx,
-        { x: p0.x + 12, y: p0.y - 8 },
-        { x: p1.x + 12, y: p1.y - 8 },
-        { x: p2.x + 12, y: p2.y - 8 },
-        { x: p3.x + 12, y: p3.y - 8 },
-        t
-      );
+      const strandColors = [PALETTE.cyan, PALETTE.gold, PALETTE.rose, PALETTE.amber, PALETTE.mint];
+      const strandCount = 5;
+      const steps = 180;
+      const maxSteps = Math.floor(steps * progress);
+
+      for (let sIdx = 0; sIdx < strandCount; sIdx++) {
+        const color = strandColors[sIdx];
+        const strandPhase = sIdx * (Math.PI * 2 / strandCount);
+
+        ctx.save();
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 12;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+
+        let headPt = waypoints[0];
+        const arcBeads = [];
+
+        for (let i = 0; i <= maxSteps; i++) {
+          const u = i / steps;
+          const spinePt = getSplinePoint(waypoints, u);
+
+          const nextPt = getSplinePoint(waypoints, Math.min(1.0, u + 0.01));
+          const angle = Math.atan2(nextPt.y - spinePt.y, nextPt.x - spinePt.x);
+          const normalAngle = angle + Math.PI / 2;
+
+          // 3D Sweeping Arc Offset (Image 1 Style)
+          const waveOffset = 36 * Math.sin(u * Math.PI * 16 + strandPhase + time * 2.8);
+
+          const x = spinePt.x + Math.cos(normalAngle) * waveOffset;
+          const y = spinePt.y + Math.sin(normalAngle) * waveOffset;
+
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+
+          // Collect Particle Bead dots along the 3D ribbon arc (Image 1)
+          if (i % 16 === 0) {
+            arcBeads.push({ x, y, r: 4.0 });
+          }
+
+          if (i === maxSteps) {
+            headPt = { x, y };
+          }
+        }
+        ctx.stroke();
+
+        // Draw Attached Particle Beads along each arc strand (Image 1)
+        arcBeads.forEach(b => {
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.r * 0.6, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Glowing Snake Head Dot at leading edge
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(headPt.x, headPt.y, 5.0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(headPt.x, headPt.y, 8.0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
     }
 
-    function drawSpirograph(ctx, cx, cy, R, r, p, rotAngle, color1, color2) {
-      ctx.setLineDash([]);
-      ctx.lineWidth = 1.4;
+    // Spline Interpolation through Waypoints
+    function getSplinePoint(pts, u) {
+      if (pts.length < 2) return pts[0];
+      const n = pts.length - 1;
+      const idx = Math.min(n - 1, Math.floor(u * n));
+      const t = u * n - idx;
+
+      const p0 = pts[Math.max(0, idx - 1)];
+      const p1 = pts[idx];
+      const p2 = pts[Math.min(n, idx + 1)];
+      const p3 = pts[Math.min(n, idx + 2)];
+
+      // Catmull-Rom Spline Formula
+      const t2 = t * t;
+      const t3 = t2 * t;
+
+      return {
+        x: 0.5 * ((2 * p1.x) + (-p0.x + p2.x) * t + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3),
+        y: 0.5 * ((2 * p1.y) + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3)
+      };
+    }
+
+    function drawEpicycloidGear(ctx, cx, cy, R, r, p, rotAngle, color1, color2) {
+      ctx.save();
+      ctx.shadowColor = color1;
+      ctx.shadowBlur = 10;
+      ctx.lineWidth = 1.5;
       ctx.strokeStyle = color1;
       ctx.beginPath();
-      const points = 140;
+      const points = 160;
       for (let i = 0; i <= points; i++) {
         const theta = (i / points) * Math.PI * 2 + rotAngle;
         const x = cx + (R + r) * Math.cos(theta) - p * Math.cos(((R + r) / r) * theta);
@@ -500,33 +664,72 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       ctx.stroke();
 
-      // Inner Rotator Ring
       ctx.strokeStyle = color2;
-      ctx.lineWidth = 1.0;
+      ctx.shadowColor = color2;
+      ctx.lineWidth = 1.1;
+      ctx.setLineDash([3, 5]);
       ctx.beginPath();
-      for (let i = 0; i <= points; i++) {
-        const theta = (i / points) * Math.PI * 2 - rotAngle * 1.5;
-        const x = cx + (R * 0.6 + r) * Math.cos(theta) - p * 0.5 * Math.cos(((R + r) / r) * theta);
-        const y = cy + (R * 0.6 + r) * Math.sin(theta) - p * 0.5 * Math.sin(((R + r) / r) * theta);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
+      ctx.arc(cx, cy, R + 18, 0, Math.PI * 2);
       ctx.stroke();
+      ctx.restore();
     }
 
-    function drawPartialBezier(ctx, p0, p1, p2, p3, t) {
+    function drawHUDNodeBadge(ctx, node, time) {
+      const { x, y, title, code, color, glow } = node;
+
+      ctx.save();
+      ctx.shadowColor = glow;
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      const steps = 70;
-      const maxSteps = Math.floor(steps * t);
-      for (let i = 0; i <= maxSteps; i++) {
-        const stepT = (i / steps);
-        const u = 1 - stepT;
-        const x = u * u * u * p0.x + 3 * u * u * stepT * p1.x + 3 * u * stepT * stepT * p2.x + stepT * stepT * stepT * p3.x;
-        const y = u * u * u * p0.y + 3 * u * u * stepT * p1.y + 3 * u * stepT * stepT * p2.y + stepT * stepT * stepT * p3.y;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.arc(x, y, 9, 0, Math.PI * 2);
       ctx.stroke();
+
+      // Translucent Badge Card
+      const cardW = 150;
+      const cardH = 38;
+      const cardX = x + 24;
+      const cardY = y - 19;
+
+      ctx.fillStyle = PALETTE.cardBg;
+      ctx.shadowColor = glow;
+      ctx.shadowBlur = 8;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.2;
+      roundRect(ctx, cardX, cardY, cardW, cardH, 6, true, true);
+
+      ctx.shadowBlur = 0;
+      ctx.font = 'bold 11px "Inter", monospace';
+      ctx.fillStyle = color;
+      ctx.fillText(title, cardX + 10, cardY + 16);
+
+      ctx.font = '9px "Inter", monospace';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+      ctx.fillText(code, cardX + 10, cardY + 29);
+
+      ctx.restore();
+    }
+
+    function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
     }
   }
 
