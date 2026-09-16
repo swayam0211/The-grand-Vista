@@ -1,0 +1,381 @@
+/* ==========================================================================
+   THE GRAND VISTA — PARALLAX CANVAS STYLESHEET (PAINTER'S EDITION)
+   ========================================================================== */
+
+:root {
+  --gold-primary: #d4af37;
+  --gold-accent: #f3e5ab;
+  --bg-dark: #0a0c10;
+  --hud-bg: rgba(15, 17, 23, 0.75);
+  --hud-border: rgba(212, 175, 55, 0.25);
+  --text-light: #f5f5f7;
+  --text-muted: #a1a1a6;
+}
+
+/* Base Resets */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Smooth Scroll Container */
+.scroll-wrapper {
+  width: 100%;
+  position: relative;
+  overflow: hidden; /* Prevent horizontal scroll bars */
+}
+
+/* Master Parallax Canvas */
+.parallax-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1440px;
+  height: 8592px;
+  transform-origin: top left;
+  transform: scale(var(--scale, 1));
+  box-shadow: 0 0 100px rgba(0,0,0,0.8);
+  background: var(--bg-dark);
+}
+
+/* Layer Base Utility */
+.p-layer {
+  position: absolute;
+  will-change: transform, opacity;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+/* Z-Index Hierarchy */
+.bg-layer { z-index: 1; }
+.bg-depth-layer { z-index: 5; }
+.mid-layer { z-index: 15; }
+.sky-layer { z-index: 25; }
+
+/* Section 1 Layering Stack & HD Enhancements */
+#tree-bare-left { z-index: 30; }          /* Lowest layer of foreground trees */
+#tree-top-canopy { z-index: 35; }         /* Above bare tree, below clouds & giant overlay */
+#trees-giant-overlay { z-index: 40; }     /* Above both tree canopy and bare tree */
+#figures-silhouette { 
+  z-index: 45; 
+  filter: contrast(115%) brightness(92%) drop-shadow(0 8px 20px rgba(0,0,0,0.55));
+}
+.sky-cloud { z-index: 50; }               /* Covers section on top layout on page load */
+.video-canvas { z-index: 60; }
+.curtain-layer { z-index: 100; }          /* Giant cloud curtain overlay top */
+
+/* HD Sharpness & Contrast Optimization for Tree Cutouts */
+#tree-top-canopy,
+#trees-giant-overlay,
+#tree-bare-left {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  filter: contrast(108%) brightness(102%);
+}
+
+
+/* Flipped Background Layer */
+.bg-flipped {
+  transform: rotate(180deg);
+}
+
+
+
+/* Full coverage Cloud Intro Curtain */
+#clouds-giant-overlay {
+  transform-origin: top center;
+}
+
+/* ==========================================================================
+   MUSEUM HUD & OVERLAY INTERFACE
+   ========================================================================== */
+.museum-hud {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1360px, 94vw);
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 28px;
+  background: var(--hud-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--hud-border);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.hud-brand {
+  display: flex;
+  flex-direction: column;
+}
+
+.hud-tag {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  color: var(--gold-primary);
+  text-transform: uppercase;
+}
+
+.hud-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gold-accent);
+  margin-top: 2px;
+  background: linear-gradient(135deg, #ffffff 0%, var(--gold-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hud-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.hud-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid var(--hud-border);
+  border-radius: 30px;
+  color: var(--gold-accent);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.hud-btn:hover {
+  background: rgba(212, 175, 55, 0.25);
+  border-color: var(--gold-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.2);
+}
+
+.hud-depth-indicator {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding-left: 16px;
+  border-left: 1px solid var(--hud-border);
+}
+
+.depth-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+}
+
+#scroll-percent {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold-accent);
+  min-width: 44px;
+}
+
+/* ==========================================================================
+   SIDE SCENE NAVIGATION INDICATOR
+   ========================================================================== */
+.scene-nav {
+  position: fixed;
+  right: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.nav-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--hud-border);
+  background: var(--hud-bg);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.nav-dot:hover, .nav-dot.active {
+  border-color: var(--gold-primary);
+  color: var(--gold-accent);
+  background: rgba(212, 175, 55, 0.2);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+  transform: scale(1.15);
+}
+
+/* Responsive Scaling for Narrower Displays */
+@media (max-width: 1440px) {
+  .scroll-wrapper {
+    display: flex;
+    justify-content: center;
+  }
+  .parallax-canvas {
+    transform-origin: top center;
+  }
+}
+
+/* ==========================================================================
+   VISUAL EDITOR STYLES
+   ========================================================================== */
+body.edit-mode .p-layer {
+  pointer-events: auto !important;
+  cursor: crosshair;
+  transition: outline 0.1s ease;
+}
+
+body.edit-mode .p-layer:hover {
+  outline: 2px dashed var(--gold-primary);
+}
+
+body.edit-mode .p-layer.editor-selected {
+  outline: 3px solid #00f0ff !important;
+  /* Removed z-index:9999 and filters so it doesn't break layer depth or cover the screen! */
+}
+
+.editor-panel {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 380px;
+  background: var(--hud-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--hud-border);
+  border-radius: 12px;
+  padding: 20px;
+  z-index: 10000;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+  font-family: 'Inter', sans-serif;
+  color: var(--text-light);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease;
+}
+
+.editor-panel.hidden {
+  transform: translateY(120%) scale(0.9);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.editor-header h3 {
+  font-family: 'Cinzel', serif;
+  color: #00f0ff;
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.icon-btn:hover { color: #fff; }
+
+.editor-selected-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+#editor-target-id {
+  color: var(--gold-accent);
+  font-weight: 600;
+}
+
+.editor-group {
+  margin-bottom: 16px;
+}
+.editor-group label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.editor-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.editor-row input[type="range"] {
+  flex: 1;
+  accent-color: #00f0ff;
+}
+
+.editor-row input[type="number"] {
+  width: 70px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.hud-btn.primary {
+  background: rgba(0, 240, 255, 0.15);
+  border-color: #00f0ff;
+  color: #00f0ff;
+}
+.hud-btn.primary:hover {
+  background: rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+}
