@@ -368,17 +368,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let geomProgress = 0;
     let animTime = 0;
 
-    // Exact Custom Color Palette (From User's Code Editor Screenshot)
+    // Exact Custom Color Palette (Updated by User)
     const PALETTE = {
       cyan: '#414219ff',
-      cyanGlow: 'rgba(4, 66, 69, 0.95)',
-      gold: '#054701ff',
-      goldGlow: 'rgba(36, 34, 5, 0.95)',
+      cyanGlow: 'rgba(65, 66, 25, 0.95)',
+      gold: '#412c06ff',
+      goldGlow: 'rgba(71, 45, 1, 0.95)',
       rose: '#485304ff',
-      roseGlow: 'rgba(74, 62, 2, 0.9)',
+      roseGlow: 'rgba(72, 83, 4, 0.9)',
       amber: '#503104ff',
-      amberGlow: 'rgba(121, 75, 5, 0.9)',
-      mint: '#056344ff',
+      amberGlow: 'rgba(80, 49, 4, 0.9)',
+      mint: '#3e4105ff',
+      mintGlow: 'rgba(102, 91, 6, 0.9)',
       cardBg: 'rgba(6, 16, 32, 0.88)'
     };
 
@@ -393,152 +394,209 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // 100% SCROLL-DRIVEN LOOP: Stops completely when scroll stops!
     function geomLoop() {
-      animTime += 0.016;
-      drawMathematicalGeometry(geomProgress, animTime);
+      drawMathematicalGeometry(geomProgress);
       requestAnimationFrame(geomLoop);
     }
     requestAnimationFrame(geomLoop);
 
-    function drawMathematicalGeometry(progress, time) {
+    function drawMathematicalGeometry(progress) {
       ctxG.clearRect(0, 0, geomCanvas.width, geomCanvas.height);
 
       const pathProgress = Math.min(1.0, progress * 1.35);
 
+      // Scroll-derived motion value (moves ONLY when user scrolls!)
+      const scrollMotion = progress * Math.PI * 12;
+
       // ------------------------------------------------------------------------
-      // 1. STAGE 1: TORNADO VORTEX SPIRAL FUNNEL (USER'S 2nd IMAGE RECREATION)
-      // 5 Streams from Bridge Pillars enter a 3D Swirling Tornado Funnel taper!
+      // 1. STAGE 1: CALLIGRAPHIC INK FUNNEL SWOOSH (PILLARS TO CORE)
+      // Elegant minimalist calligraphic entry swoosh converging from 5 Pillars
       // ------------------------------------------------------------------------
       const pillars = [
-        { start: { x: 184, y: 167 }, color: PALETTE.cyan, glow: PALETTE.cyanGlow, phase: 0 },
-        { start: { x: 447, y: 167 }, color: PALETTE.gold, glow: PALETTE.goldGlow, phase: 1.25 },
-        { start: { x: 702, y: 167 }, color: PALETTE.rose, glow: PALETTE.roseGlow, phase: 2.50 },
-        { start: { x: 953, y: 167 }, color: PALETTE.amber, glow: PALETTE.amberGlow, phase: 3.75 },
-        { start: { x: 1210, y: 165 }, color: PALETTE.mint, glow: PALETTE.cyanGlow, phase: 5.00 }
+        { start: { x: 184, y: 167 }, color: PALETTE.cyan, glow: PALETTE.cyanGlow },
+        { start: { x: 447, y: 167 }, color: PALETTE.gold, glow: PALETTE.goldGlow },
+        { start: { x: 702, y: 167 }, color: PALETTE.rose, glow: PALETTE.roseGlow },
+        { start: { x: 953, y: 167 }, color: PALETTE.amber, glow: PALETTE.amberGlow },
+        { start: { x: 1210, y: 165 }, color: PALETTE.mint, glow: PALETTE.mintGlow }
       ];
 
-      // Draw Tornado Funnel Strands (Image 2)
-      pillars.forEach((p, idx) => {
-        drawTornadoVortexStream(ctxG, p.start, idx, pathProgress, time, p.color, p.glow, p.phase);
-      });
+      // Draw Pillar Origin Dots & Delicate Tapered Rays
+      drawPillarCalligraphicBeams(ctxG, pillars, pathProgress);
 
-      // ------------------------------------------------------------------------
-      // 2. STAGE 2: SWEEPING 3D CURVED RIBBON WAVE WITH BEAD DOTS (USER'S 1st IMAGE RECREATION)
-      // Passing behind Citadel -> Emerge Bottom-Right -> U-Curve Left -> Behind Minaret -> Road Base
-      // (PRESERVED EXACT PATH WAYPOINTS UNTOUCHED)
-      // ------------------------------------------------------------------------
-      if (pathProgress > 0.32) {
-        const waveProgress = Math.min(1.0, (pathProgress - 0.32) * 1.6);
-        drawSweepingRibbonWave(ctxG, waveProgress, time);
+      // Draw Calligraphic Funnel Swoosh & Orbital Micro-Dots
+      if (pathProgress > 0.05) {
+        drawCalligraphicFunnelSwoosh(ctxG, pillars, pathProgress, scrollMotion);
       }
 
       // ------------------------------------------------------------------------
-      // 3. FOCAL NODES & HUD BADGE CARDS
+      // 2. STAGE 2: ELEGANT FLUID CALLIGRAPHIC RIBBON SWOOSH & MICRO-DOTS
+      // Minimalist organic brush swoosh loop (matching user's reference image!)
+      // (EXACT PATH WAYPOINTS PRESERVED)
+      // ------------------------------------------------------------------------
+      if (pathProgress > 0.28) {
+        const waveProgress = Math.min(1.0, (pathProgress - 0.28) * 1.6);
+        drawFluidCalligraphicRibbon(ctxG, waveProgress, scrollMotion);
+      }
+
+      // ------------------------------------------------------------------------
+      // 3. STAGE 3: FOCAL RETICLE NODES & HUD BADGE CARDS
       // ------------------------------------------------------------------------
       const nodes = {
         citadel: { x: 1060, y: 1200, title: "CITADEL APEX", code: "3787px • 42.8° N", color: PALETTE.gold, glow: PALETTE.goldGlow },
         minaretLeft: { x: 160, y: 1600, title: "MINARET SPIRE", code: "4900px • 18.4° E", color: PALETTE.rose, glow: PALETTE.roseGlow },
         skyline: { x: 1280, y: 1650, title: "EUROPEAN DOME", code: "4950px • 64.2° W", color: PALETTE.cyan, glow: PALETTE.cyanGlow },
-        roadBase: { x: 650, y: 2450, title: "ROAD BASE", code: "5900px • ELEV 0m", color: PALETTE.mint, glow: PALETTE.cyanGlow }
+        roadBase: { x: 650, y: 2450, title: "ROAD BASE", code: "5900px • ELEV 0m", color: PALETTE.mint, glow: PALETTE.mintGlow }
       };
 
       if (pathProgress > 0.4) {
-        drawEpicycloidGear(ctxG, nodes.citadel.x, nodes.citadel.y, 130, 39, 30, time * 0.6, PALETTE.gold, PALETTE.cyan);
-        drawEpicycloidGear(ctxG, nodes.minaretLeft.x, nodes.minaretLeft.y, 120, 36, 28, -time * 0.8, PALETTE.rose, PALETTE.amber);
-        drawEpicycloidGear(ctxG, nodes.skyline.x, nodes.skyline.y, 135, 40, 32, time * 0.7, PALETTE.cyan, PALETTE.mint);
-        drawEpicycloidGear(ctxG, nodes.roadBase.x, nodes.roadBase.y, 125, 38, 29, -time * 0.5, PALETTE.mint, PALETTE.gold);
+        drawEpicycloidGear(ctxG, nodes.citadel.x, nodes.citadel.y, 130, 39, 30, scrollMotion * 0.4, PALETTE.gold, PALETTE.cyan);
+        drawEpicycloidGear(ctxG, nodes.minaretLeft.x, nodes.minaretLeft.y, 120, 36, 28, -scrollMotion * 0.5, PALETTE.rose, PALETTE.amber);
+        drawEpicycloidGear(ctxG, nodes.skyline.x, nodes.skyline.y, 135, 40, 32, scrollMotion * 0.45, PALETTE.cyan, PALETTE.mint);
+        drawEpicycloidGear(ctxG, nodes.roadBase.x, nodes.roadBase.y, 125, 38, 29, -scrollMotion * 0.35, PALETTE.mint, PALETTE.gold);
 
         Object.values(nodes).forEach((node) => {
-          drawHUDNodeBadge(ctxG, node, time);
+          drawHUDNodeBadge(ctxG, node);
         });
       }
     }
 
-    // --- STAGE 1: TORNADO VORTEX FUNNEL (IMAGE 2 RECREATION) ---
-    function drawTornadoVortexStream(ctx, startPt, idx, progress, time, color, glowColor, phase) {
-      if (progress <= 0) return;
+    // --- PILLAR ORIGIN CALLIGRAPHIC BEAMS ---
+    function drawPillarCalligraphicBeams(ctx, pillars, progress) {
+      ctx.save();
+      pillars.forEach(p => {
+        ctx.shadowColor = p.glow;
+        ctx.shadowBlur = 8;
 
-      const steps = 140;
-      const maxSteps = Math.floor(steps * progress);
+        // Micro Dot at origin
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.start.x, p.start.y, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(p.start.x, p.start.y, 7.5, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Delicate Tapered Entry Line
+        if (progress > 0.02) {
+          const reach = Math.min(1.0, progress * 8.0);
+          const targetX = p.start.x + (680 - p.start.x) * 0.3 * reach;
+          const targetY = p.start.y + (220 - p.start.y) * reach;
+
+          ctx.strokeStyle = p.color;
+          ctx.globalAlpha = 0.55;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(p.start.x, p.start.y);
+          ctx.lineTo(targetX, targetY);
+          ctx.stroke();
+        }
+      });
+      ctx.restore();
+    }
+
+    // --- CALLIGRAPHIC FUNNEL SWOOSH (STAGE 1) ---
+    function drawCalligraphicFunnelSwoosh(ctx, pillars, progress, scrollMotion) {
+      const steps = 90;
+      const maxSteps = Math.floor(steps * Math.min(1.0, progress * 1.3));
 
       ctx.save();
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 4;
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2.2;
-      ctx.beginPath();
 
-      let headPt = startPt;
-      const beadPositions = [];
+      // Minimalist: 2 Tapered Calligraphic Funnel Strands (Gold & Cyan)
+      const funnelStrands = [
+        { color: PALETTE.gold, glow: PALETTE.goldGlow, phase: 0 },
+        { color: PALETTE.cyan, glow: PALETTE.cyanGlow, phase: Math.PI }
+      ];
 
-      for (let step = 0; step <= maxSteps; step++) {
-        const u = step / steps;
-        let x, y;
+      funnelStrands.forEach(strand => {
+        ctx.shadowColor = strand.glow;
+        ctx.shadowBlur = 8;
+        ctx.strokeStyle = strand.color;
 
-        if (u < 0.22) {
-          // Entry stream from bridge pillar base
-          const entryT = u / 0.22;
-          x = startPt.x + (680 + (idx - 2) * 120 - startPt.x) * entryT * entryT;
-          y = startPt.y + (220 - startPt.y) * entryT;
-        } else {
-          // 3D Tornado Funnel Spiral (Wide top funnel tapering down to tight core - Image 2)
-          const funnelT = (u - 0.22) / 0.78;
-          const funnelY = 220 + funnelT * 420;
+        let headPt = { x: 680, y: 220 };
 
-          // Funnel Radius Taper: 190px top down to 28px bottom core
-          const funnelRadius = (190 * (1.0 - funnelT)) + 28;
+        for (let i = 1; i <= maxSteps; i++) {
+          const u = i / steps;
+          const funnelY = 220 + u * 420;
+          const radius = (190 * (1.0 - u)) + 24;
+          const ry = radius * 0.38;
 
-          // 3D Rotation Angle around Tornado Axis
-          const angle = funnelT * Math.PI * 16 + phase + time * 2.2;
+          // Calligraphic Swoosh Angle
+          const angle = u * Math.PI * 6 + strand.phase + scrollMotion * 0.6;
+          const x = 680 + Math.cos(angle) * radius;
+          const y = funnelY + Math.sin(angle) * ry;
 
-          // 3D Perspective Projection (Perspective tilt)
-          const rx = funnelRadius * Math.cos(angle);
-          const ry = funnelRadius * Math.sin(angle) * 0.38;
+          // Variable Tapered Stroke Width (Calligraphic Brush Effect)
+          const strokeWidth = 1.2 + Math.sin(u * Math.PI) * 4.5;
+          ctx.lineWidth = strokeWidth;
 
-          x = 680 + rx;
-          y = funnelY + ry;
+          const prevAngle = (u - 1 / steps) * Math.PI * 6 + strand.phase + scrollMotion * 0.6;
+          const prevRadius = (190 * (1.0 - (u - 1 / steps))) + 24;
+          const prevX = 680 + Math.cos(prevAngle) * prevRadius;
+          const prevY = (220 + (u - 1 / steps) * 420) + Math.sin(prevAngle) * (prevRadius * 0.38);
 
-          // Record positions for orbiting particle beads along tornado rings (Image 2)
-          if (step % 12 === 0) {
-            beadPositions.push({ x, y, size: 3.5 + (1.0 - funnelT) * 2.5 });
-          }
+          ctx.beginPath();
+          ctx.moveTo(prevX, prevY);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+
+          if (i === maxSteps) headPt = { x, y };
         }
 
-        if (step === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-
-        if (step === maxSteps) {
-          headPt = { x, y };
-        }
-      }
-      ctx.stroke();
-
-      // Draw Orbiting Particle Beads along Tornado Funnel (Image 2)
-      beadPositions.forEach(b => {
-        ctx.fillStyle = color;
+        // Micro Dot at leading tip
+        ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
+        ctx.arc(headPt.x, headPt.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = strand.color;
+        ctx.beginPath();
+        ctx.arc(headPt.x, headPt.y, 4.5, 0, Math.PI * 2);
         ctx.fill();
       });
 
-      // Leading Snake Head Circle Dot
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 8;
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(headPt.x, headPt.y, 4.5, 0, Math.PI * 2);
-      ctx.fill();
+      // Minimalist Dashed Orbital Rings with Floating Micro Dots
+      const ringLevels = [280, 420, 560];
+      ringLevels.forEach((cy, rIdx) => {
+        const ringT = (cy - 220) / 420;
+        if (ringT > progress * 1.3) return;
 
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.arc(headPt.x, headPt.y, 7.5, 0, Math.PI * 2);
-      ctx.fill();
+        const rx = 190 * (1.0 - ringT) + 24;
+        const ry = rx * 0.38;
+
+        ctx.strokeStyle = rIdx % 2 === 0 ? PALETTE.rose : PALETTE.mint;
+        ctx.globalAlpha = 0.35;
+        ctx.lineWidth = 1.0;
+        ctx.setLineDash([3, 5]);
+        ctx.beginPath();
+        ctx.ellipse(680, cy, rx, ry, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Solid Micro-Dots along ring (Matching User Screenshot!)
+        ctx.setLineDash([]);
+        const dotCount = 6;
+        for (let d = 0; d < dotCount; d++) {
+          const dotAngle = (d / dotCount) * Math.PI * 2 + scrollMotion * (rIdx % 2 === 0 ? 0.4 : -0.4);
+          const px = 680 + Math.cos(dotAngle) * rx;
+          const py = cy + Math.sin(dotAngle) * ry;
+
+          ctx.globalAlpha = 0.85;
+          ctx.fillStyle = rIdx % 2 === 0 ? PALETTE.rose : PALETTE.mint;
+          ctx.beginPath();
+          ctx.arc(px, py, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
 
       ctx.restore();
     }
 
-    // --- STAGE 2: SWEEPING 3D CURVED RIBBON WAVE WITH BEAD DOTS (IMAGE 1 RECREATION) ---
-    function drawSweepingRibbonWave(ctx, progress, time) {
+    // --- FLUID CALLIGRAPHIC RIBBON SWOOSH (STAGE 2 - MATCHING REFERENCE IMAGE!) ---
+    function drawFluidCalligraphicRibbon(ctx, progress, scrollMotion) {
+      // Preserved exact path waypoints:
       const waypoints = [
         { x: 680, y: 640 },
         { x: 650, y: 950 },
@@ -548,81 +606,182 @@ document.addEventListener('DOMContentLoaded', () => {
         { x: 650, y: 2450 }
       ];
 
-      const strandColors = [PALETTE.cyan, PALETTE.gold, PALETTE.rose, PALETTE.amber, PALETTE.mint];
-      const strandCount = 5;
-      const steps = 180;
+      const steps = 140;
       const maxSteps = Math.floor(steps * progress);
 
-      for (let sIdx = 0; sIdx < strandCount; sIdx++) {
-        const color = strandColors[sIdx];
-        const strandPhase = sIdx * (Math.PI * 2 / strandCount);
+      ctx.save();
 
-        ctx.save();
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 12;
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2.4;
+      // Reduced Line Count: 2 Primary Calligraphic Swoosh Ribbon Strokes!
+      const swooshes = [
+        { color: PALETTE.gold, glow: PALETTE.goldGlow, phase: 0, widthScale: 1.0 },
+        { color: PALETTE.mint, glow: PALETTE.mintGlow, phase: Math.PI * 0.75, widthScale: 0.7 }
+      ];
+
+      // 1. Draw Minimalist Orbital Ellipses & Micro-Dots at Path Inflection Loops
+      const orbitalNodes = [
+        { x: 650, y: 950, rx: 140, ry: 60, color: PALETTE.mint, trigger: 0.15 },
+        { x: 1080, y: 1200, rx: 160, ry: 70, color: PALETTE.gold, trigger: 0.35 },
+        { x: 260, y: 1550, rx: 150, ry: 65, color: PALETTE.rose, trigger: 0.55 },
+        { x: 650, y: 2450, rx: 135, ry: 55, color: PALETTE.amber, trigger: 0.85 }
+      ];
+
+      orbitalNodes.forEach((orb, oIdx) => {
+        if (progress < orb.trigger) return;
+
+        // Faint Dashed Orbital Guide Ellipse
+        ctx.strokeStyle = orb.color;
+        ctx.globalAlpha = 0.4;
+        ctx.lineWidth = 1.1;
+        ctx.setLineDash([4, 6]);
         ctx.beginPath();
+        ctx.ellipse(orb.x, orb.y, orb.rx, orb.ry, 0.1, 0, Math.PI * 2);
+        ctx.stroke();
 
-        let headPt = waypoints[0];
-        const arcBeads = [];
+        // Solid Micro Dots (Matching User Screenshot!)
+        ctx.setLineDash([]);
+        const dotCount = 8;
+        for (let d = 0; d < dotCount; d++) {
+          const dotAngle = (d / dotCount) * Math.PI * 2 + scrollMotion * (oIdx % 2 === 0 ? 0.45 : -0.45);
+          const px = orb.x + Math.cos(dotAngle) * orb.rx;
+          const py = orb.y + Math.sin(dotAngle) * orb.ry;
 
+          ctx.globalAlpha = 0.85;
+          ctx.fillStyle = orb.color;
+          ctx.beginPath();
+          ctx.arc(px, py, 2.3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // 2. Draw Calligraphic Tapered Brush Ribbon Swoosh Lines
+      swooshes.forEach(swoosh => {
+        ctx.shadowColor = swoosh.glow;
+        ctx.shadowBlur = 10;
+        ctx.globalAlpha = 1.0;
+        ctx.setLineDash([]);
+
+        const points = [];
         for (let i = 0; i <= maxSteps; i++) {
           const u = i / steps;
           const spinePt = getSplinePoint(waypoints, u);
-
-          const nextPt = getSplinePoint(waypoints, Math.min(1.0, u + 0.01));
+          const nextPt = getSplinePoint(waypoints, Math.min(1.0, u + 0.015));
           const angle = Math.atan2(nextPt.y - spinePt.y, nextPt.x - spinePt.x);
           const normalAngle = angle + Math.PI / 2;
 
-          // 3D Sweeping Arc Offset (Image 1 Style)
-          const waveOffset = 36 * Math.sin(u * Math.PI * 16 + strandPhase + time * 2.8);
+          // Calligraphic Fluid Loop Offset
+          const offset = (32 * Math.sin(u * Math.PI * 8 + swoosh.phase + scrollMotion * 0.5)
+            + 10 * Math.cos(u * Math.PI * 14 - scrollMotion * 0.3)) * swoosh.widthScale;
 
-          const x = spinePt.x + Math.cos(normalAngle) * waveOffset;
-          const y = spinePt.y + Math.sin(normalAngle) * waveOffset;
+          const x = spinePt.x + Math.cos(normalAngle) * offset;
+          const y = spinePt.y + Math.sin(normalAngle) * offset;
 
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
+          // Calligraphic Dynamic Width Taper (Thick in swoosh body, thin at tips - matching image!)
+          const widthTaper = (2.0 + Math.sin(u * Math.PI) * 9.5) * swoosh.widthScale;
 
-          // Collect Particle Bead dots along the 3D ribbon arc (Image 1)
-          if (i % 16 === 0) {
-            arcBeads.push({ x, y, r: 4.0 });
-          }
+          points.push({ x, y, width: widthTaper, u });
+        }
 
-          if (i === maxSteps) {
-            headPt = { x, y };
+        if (points.length < 2) return;
+
+        // Render Calligraphic Multi-Bristle Stroke (Tapered Ink Swoosh Effect)
+        ctx.strokeStyle = swoosh.color;
+
+        for (let i = 1; i < points.length; i++) {
+          const p1 = points[i - 1];
+          const p2 = points[i];
+
+          // Main Calligraphic Core Line with Dynamic Width
+          ctx.lineWidth = p2.width;
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+
+          // Delicate Parallel Bristle Line (Adds calligraphic brush texture!)
+          ctx.lineWidth = 1.0;
+          ctx.globalAlpha = 0.5;
+          ctx.beginPath();
+          ctx.moveTo(p1.x + 2, p1.y - 1);
+          ctx.lineTo(p2.x + 2, p2.y - 1);
+          ctx.stroke();
+          ctx.globalAlpha = 1.0;
+
+          // Solid Micro-Dots placed along Calligraphic Loop Apexes
+          if (i % 8 === 0) {
+            ctx.fillStyle = swoosh.color;
+            ctx.beginPath();
+            ctx.arc(p2.x, p2.y, 2.4, 0, Math.PI * 2);
+            ctx.fill();
           }
         }
-        ctx.stroke();
 
-        // Draw Attached Particle Beads along each arc strand (Image 1)
-        arcBeads.forEach(b => {
+        // Calligraphic Snake-Head Dot at leading tip
+        const headPt = points[points.length - 1];
+        if (headPt) {
+          ctx.shadowColor = swoosh.color;
+          ctx.shadowBlur = 12;
+
+          ctx.strokeStyle = swoosh.color;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(headPt.x, headPt.y, 10.0, 0, Math.PI * 2);
+          ctx.stroke();
+
           ctx.fillStyle = '#ffffff';
           ctx.beginPath();
-          ctx.arc(b.x, b.y, b.r * 0.6, 0, Math.PI * 2);
+          ctx.arc(headPt.x, headPt.y, 4.0, 0, Math.PI * 2);
           ctx.fill();
 
-          ctx.fillStyle = color;
+          ctx.fillStyle = swoosh.color;
           ctx.beginPath();
-          ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+          ctx.arc(headPt.x, headPt.y, 7.0, 0, Math.PI * 2);
           ctx.fill();
-        });
+        }
+      });
 
-        // Glowing Snake Head Dot at leading edge
-        ctx.shadowColor = '#ffffff';
-        ctx.shadowBlur = 20;
-        ctx.fillStyle = '#ffffff';
+      ctx.restore();
+    }
+
+    // --- COMPASS TARGET RETICLE WITH SCROLL-DRIVEN AZIMUTH TICKS ---
+    function drawCompassTargetReticle(ctx, x, y, color, scrollMotion) {
+      ctx.save();
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 12;
+      ctx.globalAlpha = 1.0;
+
+      // Outer Compass Ring
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(x, y, 11.5, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Rotating Azimuth Ticks (Driven 100% by scrollMotion!)
+      ctx.lineWidth = 1.1;
+      for (let a = 0; a < Math.PI * 2; a += Math.PI / 2) {
+        const rotA = a + scrollMotion * 0.4;
+        const x1 = x + Math.cos(rotA) * 9;
+        const y1 = y + Math.sin(rotA) * 9;
+        const x2 = x + Math.cos(rotA) * 15;
+        const y2 = y + Math.sin(rotA) * 15;
         ctx.beginPath();
-        ctx.arc(headPt.x, headPt.y, 5.0, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(headPt.x, headPt.y, 8.0, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.restore();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
       }
+
+      // Center Core White & Color Dots
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, 7.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
     }
 
     // Spline Interpolation through Waypoints
@@ -651,7 +810,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.save();
       ctx.shadowColor = color1;
       ctx.shadowBlur = 10;
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1.6;
       ctx.strokeStyle = color1;
       ctx.beginPath();
       const points = 160;
@@ -664,6 +823,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       ctx.stroke();
 
+      // Outer Pitch Circle with Degree Tick Marks
       ctx.strokeStyle = color2;
       ctx.shadowColor = color2;
       ctx.lineWidth = 1.1;
@@ -671,10 +831,26 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.beginPath();
       ctx.arc(cx, cy, R + 18, 0, Math.PI * 2);
       ctx.stroke();
+
+      // Degree Ticks
+      ctx.setLineDash([]);
+      ctx.lineWidth = 1.2;
+      for (let deg = 0; deg < 360; deg += 30) {
+        const rad = (deg * Math.PI) / 180 + rotAngle * 0.5;
+        const x1 = cx + Math.cos(rad) * (R + 15);
+        const y1 = cy + Math.sin(rad) * (R + 15);
+        const x2 = cx + Math.cos(rad) * (R + 22);
+        const y2 = cy + Math.sin(rad) * (R + 22);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+
       ctx.restore();
     }
 
-    function drawHUDNodeBadge(ctx, node, time) {
+    function drawHUDNodeBadge(ctx, node) {
       const { x, y, title, code, color, glow } = node;
 
       ctx.save();
@@ -691,11 +867,11 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.arc(x, y, 9, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Translucent Badge Card
-      const cardW = 150;
-      const cardH = 38;
+      // Translucent Glassmorphic Badge Card
+      const cardW = 155;
+      const cardH = 40;
       const cardX = x + 24;
-      const cardY = y - 19;
+      const cardY = y - 20;
 
       ctx.fillStyle = PALETTE.cardBg;
       ctx.shadowColor = glow;
@@ -711,7 +887,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       ctx.font = '9px "Inter", monospace';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-      ctx.fillText(code, cardX + 10, cardY + 29);
+      ctx.fillText(code, cardX + 10, cardY + 30);
 
       ctx.restore();
     }
