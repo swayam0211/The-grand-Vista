@@ -41,7 +41,7 @@ html, body {
   top: 0;
   left: 0;
   width: 1440px;
-  height: 6600px;
+  height: 6350px;
   transform-origin: top left;
   transform: scale(var(--scale, 1));
   box-shadow: 0 0 100px rgba(0,0,0,0.8);
@@ -431,4 +431,15 @@ body.edit-mode .p-layer.editor-selected {
   border: 2px solid #fff;
   box-shadow: 0 0 10px currentColor;
 }
+
+/* ==========================================================================
+   SECTION 5: SKETCH & WATER-DROP FLUID COLOR REVEAL STYLES
+   ========================================================================== */
+#section-5-canvas {
+  width: 1440px;
+  height: 900px;
+  display: block;
+}
+
+
 

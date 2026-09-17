@@ -344,16 +344,290 @@ document.addEventListener('DOMContentLoaded', () => {
         scrub: true,
       }
     }
-  );
+  );  // ==========================================================================
+  // 5A. SECTION 5: MANUAL LINE-BY-LINE SKETCH & WATER-DROP COLOR REVEAL ENGINE
+  // ==========================================================================
+  const s5Canvas = document.getElementById('section-5-canvas');
 
-  let bounceTime = 0;
-  const horseCartEl = document.getElementById('horse-cart');
-  if (horseCartEl) {
-    lenis.on('scroll', () => {
-      bounceTime += 0.18;
-      const bounceY = Math.sin(bounceTime) * 3.5;
-      horseCartEl.style.transform = `translateY(${bounceY}px)`;
+  if (s5Canvas) {
+    const ctx5 = s5Canvas.getContext('2d');
+    const cw = 1440;
+    const ch = 900;
+    s5Canvas.width = cw;
+    s5Canvas.height = ch;
+
+    // Offscreen Canvas Buffer for Line-by-Line Sketch Masking
+    const sketchMaskCanvas = document.createElement('canvas');
+    sketchMaskCanvas.width = cw;
+    sketchMaskCanvas.height = ch;
+    const sketchMaskCtx = sketchMaskCanvas.getContext('2d');
+
+    // Offscreen Canvas Buffer for Masking Fluid Droplets
+    const maskCanvas = document.createElement('canvas');
+    maskCanvas.width = cw;
+    maskCanvas.height = ch;
+    const maskCtx = maskCanvas.getContext('2d');
+
+    // Offscreen Temp Color Image Buffer
+    const colorBufCanvas = document.createElement('canvas');
+    colorBufCanvas.width = cw;
+    colorBufCanvas.height = ch;
+    const colorBufCtx = colorBufCanvas.getContext('2d');
+
+    // Offscreen Temp Sketch Image Buffer
+    const sketchBufCanvas = document.createElement('canvas');
+    sketchBufCanvas.width = cw;
+    sketchBufCanvas.height = ch;
+    const sketchBufCtx = sketchBufCanvas.getContext('2d');
+
+    // Load Image Pair
+    const imgSketch = new Image();
+    const imgColor = new Image();
+    let sketchLoaded = false;
+    let colorLoaded = false;
+
+    imgSketch.src = 'images from figma/section 5 sketch.png';
+    imgColor.src = 'images from figma/section 5 color.png';
+
+    imgSketch.onload = () => { sketchLoaded = true; checkAndDrawS5(); };
+    imgColor.onload = () => { colorLoaded = true; checkAndDrawS5(); };
+
+    // Structural Vector Contour Paths for Live Hand-Drawn Sketching (Scaled to 1440x900)
+    const contourPaths = [
+      // Group 1: Sky Flying Birds & Seagulls
+      { startT: 0.00, duration: 0.18, pts: [{ x: 440, y: 160 }, { x: 480, y: 100 }, { x: 540, y: 140 }, { x: 590, y: 110 }, { x: 650, y: 170 }] },
+      { startT: 0.05, duration: 0.18, pts: [{ x: 800, y: 180 }, { x: 850, y: 140 }, { x: 910, y: 160 }, { x: 960, y: 140 }, { x: 1040, y: 190 }] },
+      { startT: 0.10, duration: 0.15, pts: [{ x: 320, y: 250 }, { x: 350, y: 230 }, { x: 390, y: 260 }, { x: 430, y: 240 }, { x: 470, y: 270 }] },
+
+      // Group 2: Cathedral Spire & Dome Architecture
+      { startT: 0.12, duration: 0.22, pts: [{ x: 1150, y: 620 }, { x: 1150, y: 480 }, { x: 1150, y: 340 }, { x: 1155, y: 240 }, { x: 1155, y: 160 }] },
+      { startT: 0.18, duration: 0.20, pts: [{ x: 1010, y: 570 }, { x: 1070, y: 520 }, { x: 1120, y: 490 }, { x: 1150, y: 480 }, { x: 1200, y: 510 }, { x: 1290, y: 560 }] },
+      { startT: 0.22, duration: 0.18, pts: [{ x: 870, y: 590 }, { x: 930, y: 560 }, { x: 990, y: 540 }, { x: 1050, y: 570 }, { x: 1120, y: 590 }] },
+
+      // Group 3: River Arch Bridge & Railings
+      { startT: 0.25, duration: 0.25, pts: [{ x: 170, y: 710 }, { x: 370, y: 690 }, { x: 570, y: 680 }, { x: 770, y: 690 }, { x: 970, y: 700 }, { x: 1170, y: 720 }] },
+      { startT: 0.30, duration: 0.22, pts: [{ x: 190, y: 670 }, { x: 400, y: 650 }, { x: 610, y: 640 }, { x: 820, y: 650 }, { x: 1030, y: 670 }] },
+      { startT: 0.35, duration: 0.18, pts: [{ x: 370, y: 750 }, { x: 380, y: 690 }, { x: 390, y: 750 }] },
+      { startT: 0.38, duration: 0.18, pts: [{ x: 770, y: 750 }, { x: 780, y: 690 }, { x: 790, y: 750 }] },
+
+      // Group 4: Left Riverside Bare Trees & Branches
+      { startT: 0.15, duration: 0.25, pts: [{ x: 40, y: 850 }, { x: 60, y: 680 }, { x: 80, y: 540 }, { x: 100, y: 410 }, { x: 110, y: 300 }] },
+      { startT: 0.20, duration: 0.20, pts: [{ x: 80, y: 540 }, { x: 140, y: 480 }, { x: 200, y: 450 }, { x: 250, y: 440 }] },
+      { startT: 0.24, duration: 0.20, pts: [{ x: 100, y: 410 }, { x: 40, y: 360 }, { x: 10, y: 340 }] },
+
+      // Group 5: River Surface & Promenade Edge
+      { startT: 0.32, duration: 0.25, pts: [{ x: 0, y: 790 }, { x: 270, y: 800 }, { x: 580, y: 810 }, { x: 900, y: 820 }, { x: 1440, y: 850 }] },
+      { startT: 0.40, duration: 0.22, pts: [{ x: 210, y: 840 }, { x: 480, y: 850 }, { x: 740, y: 860 }, { x: 1060, y: 870 }] }
+    ];
+
+    // Droplet Impact Configurations for Phase 2 Fluid Color Bloom (Scaled to 1440x900)
+    const droplets = [
+      { x: 1155, y: 210, startProgress: 0.0, maxR: 620 },
+      { x: 470, y: 680, startProgress: 0.08, maxR: 580 },
+      { x: 910, y: 160, startProgress: 0.16, maxR: 600 },
+      { x: 630, y: 810, startProgress: 0.26, maxR: 560 },
+      { x: 1060, y: 130, startProgress: 0.36, maxR: 570 },
+      { x: 110, y: 300, startProgress: 0.46, maxR: 540 },
+      { x: 370, y: 850, startProgress: 0.56, maxR: 580 },
+      { x: 1270, y: 650, startProgress: 0.66, maxR: 590 },
+      { x: 790, y: 410, startProgress: 0.76, maxR: 640 },
+      { x: 720, y: 450, startProgress: 0.86, maxR: 800 }
+    ];
+
+    let s5TargetProgress = 0;
+    let s5LerpProgress = 0;
+
+    ScrollTrigger.create({
+      trigger: mainTrigger,
+      start: s(4600),
+      end: s(6150),
+      scrub: true,
+      onUpdate: (self) => {
+        s5TargetProgress = self.progress;
+
+        // Sticky Screen Lock at 5445px when scrolled into viewport view
+        const currentScrollY = window.scrollY || window.pageYOffset || 0;
+        if (currentScrollY >= 5445 && currentScrollY <= 6650) {
+          const pinOffset = currentScrollY - 5445;
+          s5Canvas.style.transform = `translateY(${pinOffset}px)`;
+        } else if (currentScrollY < 5445) {
+          s5Canvas.style.transform = `translateY(0px)`;
+        }
+      }
     });
+
+    function s5Loop() {
+      s5LerpProgress += (s5TargetProgress - s5LerpProgress) * 0.14;
+      checkAndDrawS5();
+      requestAnimationFrame(s5Loop);
+    }
+    requestAnimationFrame(s5Loop);
+
+    function checkAndDrawS5() {
+      if (!sketchLoaded || !colorLoaded) return;
+      renderSection5(s5LerpProgress);
+    }
+
+    function renderSection5(progress) {
+      ctx5.clearRect(0, 0, cw, ch);
+
+      // Phase 1: Manual Hand-Drawn Sketching (Progress 0.0 -> 0.45)
+      const sketchProg = Math.min(1.0, progress / 0.45);
+
+      // Phase 2: Water Drop Fluid Color Reveal (Progress 0.40 -> 1.0)
+      const fluidProg = Math.max(0.0, (progress - 0.40) / 0.60);
+
+      // 1. RENDER MANUAL LINE-BY-LINE HAND SKETCHING
+      sketchMaskCtx.clearRect(0, 0, cw, ch);
+
+      if (sketchProg < 1.0) {
+        // Draw progressive stroke lines along contour paths
+        contourPaths.forEach((path) => {
+          if (sketchProg >= path.startT) {
+            const pathProg = Math.min(1.0, (sketchProg - path.startT) / path.duration);
+            const totalPts = path.pts.length;
+            const currentIdx = Math.floor(pathProg * (totalPts - 1));
+            const subT = (pathProg * (totalPts - 1)) - currentIdx;
+
+            // Draw organic line stroke reveal mask
+            sketchMaskCtx.save();
+            sketchMaskCtx.lineCap = 'round';
+            sketchMaskCtx.lineJoin = 'round';
+            sketchMaskCtx.lineWidth = 110 * (0.3 + pathProg * 0.7);
+            sketchMaskCtx.fillStyle = '#000000';
+            sketchMaskCtx.strokeStyle = '#000000';
+            sketchMaskCtx.beginPath();
+
+            for (let i = 0; i <= currentIdx; i++) {
+              const pt = path.pts[i];
+              if (i === 0) sketchMaskCtx.moveTo(pt.x, pt.y);
+              else sketchMaskCtx.lineTo(pt.x, pt.y);
+            }
+
+            if (currentIdx < totalPts - 1) {
+              const pA = path.pts[currentIdx];
+              const pB = path.pts[currentIdx + 1];
+              const curX = pA.x + (pB.x - pA.x) * subT;
+              const curY = pA.y + (pB.y - pA.y) * subT;
+              sketchMaskCtx.lineTo(curX, curY);
+            }
+            sketchMaskCtx.stroke();
+            sketchMaskCtx.restore();
+          }
+        });
+
+        // Background base reveal radius expanding with overall sketch progress
+        sketchMaskCtx.save();
+        const baseR = sketchProg * cw * 0.65;
+        const radG = sketchMaskCtx.createRadialGradient(cw * 0.5, ch * 0.5, 0, cw * 0.5, ch * 0.5, baseR);
+        radG.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
+        radG.addColorStop(0.7, 'rgba(0, 0, 0, 0.85)');
+        radG.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        sketchMaskCtx.fillStyle = radG;
+        sketchMaskCtx.fillRect(0, 0, cw, ch);
+        sketchMaskCtx.restore();
+
+        // Mask sketch image with progressive line drawing mask
+        sketchBufCtx.clearRect(0, 0, cw, ch);
+        sketchBufCtx.drawImage(imgSketch, 0, 0, cw, ch);
+        sketchBufCtx.globalCompositeOperation = 'destination-in';
+        sketchBufCtx.drawImage(sketchMaskCanvas, 0, 0, cw, ch);
+        sketchBufCtx.globalCompositeOperation = 'source-over';
+
+        ctx5.drawImage(sketchBufCanvas, 0, 0, cw, ch);
+
+        // Draw active pencil tip dots along leading line strokes
+        contourPaths.forEach((path) => {
+          if (sketchProg >= path.startT && sketchProg <= path.startT + path.duration) {
+            const pathProg = (sketchProg - path.startT) / path.duration;
+            const totalPts = path.pts.length;
+            const currentIdx = Math.min(totalPts - 2, Math.floor(pathProg * (totalPts - 1)));
+            const subT = (pathProg * (totalPts - 1)) - currentIdx;
+            const pA = path.pts[currentIdx];
+            const pB = path.pts[currentIdx + 1];
+            const tipX = pA.x + (pB.x - pA.x) * subT;
+            const tipY = pA.y + (pB.y - pA.y) * subT;
+
+            ctx5.save();
+            ctx5.shadowColor = '#d4af37';
+            ctx5.shadowBlur = 12;
+            ctx5.fillStyle = '#1c1b18';
+            ctx5.beginPath();
+            ctx5.arc(tipX, tipY, 4.5, 0, Math.PI * 2);
+            ctx5.fill();
+
+            ctx5.fillStyle = '#d4af37';
+            ctx5.beginPath();
+            ctx5.arc(tipX, tipY, 2.0, 0, Math.PI * 2);
+            ctx5.fill();
+            ctx5.restore();
+          }
+        });
+
+      } else {
+        // Full sketch complete
+        ctx5.drawImage(imgSketch, 0, 0, cw, ch);
+      }
+
+      // 2. RENDER FLUID WATER DROP COLOR BLOOM REVEAL
+      if (fluidProg > 0.0) {
+        maskCtx.clearRect(0, 0, cw, ch);
+
+        // Render expanding organic watercolor blobs onto maskCtx
+        droplets.forEach((d) => {
+          if (fluidProg >= d.startProgress) {
+            const dropAge = (fluidProg - d.startProgress) / (1.0 - d.startProgress);
+            const currentR = Math.pow(dropAge, 0.72) * d.maxR;
+
+            maskCtx.save();
+            const radGrad = maskCtx.createRadialGradient(d.x, d.y, currentR * 0.25, d.x, d.y, currentR);
+            radGrad.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
+            radGrad.addColorStop(0.78, 'rgba(0, 0, 0, 0.92)');
+            radGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+            maskCtx.fillStyle = radGrad;
+            maskCtx.beginPath();
+
+            const points = 28;
+            for (let i = 0; i <= points; i++) {
+              const angle = (i / points) * Math.PI * 2;
+              const wobble = Math.sin(angle * 6 + fluidProg * 14) * (currentR * 0.05);
+              const r = currentR + wobble;
+              const px = d.x + Math.cos(angle) * r;
+              const py = d.y + Math.sin(angle) * r;
+              if (i === 0) maskCtx.moveTo(px, py);
+              else maskCtx.lineTo(px, py);
+            }
+            maskCtx.closePath();
+            maskCtx.fill();
+            maskCtx.restore();
+
+            // Splash rings for newly landed water drops
+            if (dropAge < 0.22) {
+              const splashRingR = dropAge * 4.5 * 60;
+              const ringAlpha = (1.0 - dropAge * 4.5);
+              ctx5.save();
+              ctx5.strokeStyle = `rgba(212, 175, 55, ${ringAlpha * 0.85})`;
+              ctx5.lineWidth = 2.2;
+              ctx5.beginPath();
+              ctx5.arc(d.x, d.y, splashRingR, 0, Math.PI * 2);
+              ctx5.stroke();
+              ctx5.restore();
+            }
+          }
+        });
+
+        // Composite Color Image with Fluid Mask
+        colorBufCtx.clearRect(0, 0, cw, ch);
+        colorBufCtx.drawImage(imgColor, 0, 0, cw, ch);
+        colorBufCtx.globalCompositeOperation = 'destination-in';
+        colorBufCtx.drawImage(maskCanvas, 0, 0, cw, ch);
+        colorBufCtx.globalCompositeOperation = 'source-over';
+
+        // Render Color Artwork over Hand-Drawn Sketch
+        ctx5.drawImage(colorBufCanvas, 0, 0, cw, ch);
+      }
+    }
   }
 
   // ==========================================================================
