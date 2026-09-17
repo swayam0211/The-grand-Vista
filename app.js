@@ -382,6 +382,8 @@ document.addEventListener('DOMContentLoaded', () => {
       mintGlow: 'rgba(102, 91, 6, 0.9)',
       cardBg: 'rgba(6, 16, 32, 0.88)'
     };
+    let geomTargetProgress = 0;
+    let geomLerpProgress = 0;
 
     // ScrollTrigger starts 0.52s faster / earlier (start: s(2100))
     ScrollTrigger.create({
@@ -390,13 +392,20 @@ document.addEventListener('DOMContentLoaded', () => {
       end: s(6600),
       scrub: true,
       onUpdate: (self) => {
-        geomProgress = self.progress;
+        geomTargetProgress = self.progress;
       }
     });
 
-    // 100% SCROLL-DRIVEN LOOP: Stops completely when scroll stops!
+    // 100% SCROLL-DRIVEN LOOP WITH LENIS LERP SMOOTHING (120 FPS Performance)
     function geomLoop() {
-      drawMathematicalGeometry(geomProgress);
+      geomLerpProgress += (geomTargetProgress - geomLerpProgress) * 0.14;
+
+      if (Math.abs(geomTargetProgress - geomLerpProgress) > 0.0001) {
+        drawMathematicalGeometry(geomLerpProgress);
+      } else {
+        drawMathematicalGeometry(geomTargetProgress);
+      }
+
       requestAnimationFrame(geomLoop);
     }
     requestAnimationFrame(geomLoop);
@@ -407,40 +416,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const pathProgress = Math.min(1.0, progress * 1.35);
 
       // Scroll-derived motion value (moves ONLY when user scrolls!)
-      const scrollMotion = progress * Math.PI * 12;
+      const scrollMotion = progress * Math.PI * 10;
 
       // ------------------------------------------------------------------------
-      // 1. STAGE 1: CALLIGRAPHIC INK FUNNEL SWOOSH (PILLARS TO CORE)
-      // Elegant minimalist calligraphic entry swoosh converging from 5 Pillars
+      // 1. ORGANIC TENDRIL VORTEX & CONSTELLATION STREAM (MATCHING REFERENCE IMAGE!)
+      // 12 Fine Organic Tendril Threads with Micro-Dots Spiraling into a Tight Core
       // ------------------------------------------------------------------------
-      const pillars = [
-        { start: { x: 184, y: 167 }, color: PALETTE.cyan, glow: PALETTE.cyanGlow },
-        { start: { x: 447, y: 167 }, color: PALETTE.gold, glow: PALETTE.goldGlow },
-        { start: { x: 702, y: 167 }, color: PALETTE.rose, glow: PALETTE.roseGlow },
-        { start: { x: 953, y: 167 }, color: PALETTE.amber, glow: PALETTE.amberGlow },
-        { start: { x: 1210, y: 165 }, color: PALETTE.mint, glow: PALETTE.mintGlow }
-      ];
-
-      // Draw Pillar Origin Dots & Delicate Tapered Rays
-      drawPillarCalligraphicBeams(ctxG, pillars, pathProgress);
-
-      // Draw Calligraphic Funnel Swoosh & Orbital Micro-Dots
-      if (pathProgress > 0.05) {
-        drawCalligraphicFunnelSwoosh(ctxG, pillars, pathProgress, scrollMotion);
+      if (pathProgress > 0.02) {
+        drawOrganicTendrilVortexStream(ctxG, pathProgress, scrollMotion);
       }
 
       // ------------------------------------------------------------------------
-      // 2. STAGE 2: ELEGANT FLUID CALLIGRAPHIC RIBBON SWOOSH & MICRO-DOTS
-      // Minimalist organic brush swoosh loop (matching user's reference image!)
-      // (EXACT PATH WAYPOINTS PRESERVED)
-      // ------------------------------------------------------------------------
-      if (pathProgress > 0.28) {
-        const waveProgress = Math.min(1.0, (pathProgress - 0.28) * 1.6);
-        drawFluidCalligraphicRibbon(ctxG, waveProgress, scrollMotion);
-      }
-
-      // ------------------------------------------------------------------------
-      // 3. STAGE 3: FOCAL RETICLE NODES & HUD BADGE CARDS
+      // 2. FOCAL RETICLE NODES & HUD BADGE CARDS
       // ------------------------------------------------------------------------
       const nodes = {
         citadel: { x: 1060, y: 1200, title: "CITADEL APEX", code: "3787px • 42.8° N", color: PALETTE.gold, glow: PALETTE.goldGlow },
@@ -449,7 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
         roadBase: { x: 650, y: 2450, title: "ROAD BASE", code: "5900px • ELEV 0m", color: PALETTE.mint, glow: PALETTE.mintGlow }
       };
 
-      if (pathProgress > 0.4) {
+      if (pathProgress > 0.35) {
         drawEpicycloidGear(ctxG, nodes.citadel.x, nodes.citadel.y, 130, 39, 30, scrollMotion * 0.4, PALETTE.gold, PALETTE.cyan);
         drawEpicycloidGear(ctxG, nodes.minaretLeft.x, nodes.minaretLeft.y, 120, 36, 28, -scrollMotion * 0.5, PALETTE.rose, PALETTE.amber);
         drawEpicycloidGear(ctxG, nodes.skyline.x, nodes.skyline.y, 135, 40, 32, scrollMotion * 0.45, PALETTE.cyan, PALETTE.mint);
@@ -461,142 +448,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // --- PILLAR ORIGIN CALLIGRAPHIC BEAMS ---
-    function drawPillarCalligraphicBeams(ctx, pillars, progress) {
-      ctx.save();
-      pillars.forEach(p => {
-        ctx.shadowColor = p.glow;
-        ctx.shadowBlur = 8;
+    // --- ORGANIC TENDRIL VORTEX & CONSTELLATION STREAM (3 LINES ONLY) ---
+    function drawOrganicTendrilVortexStream(ctx, progress, scrollMotion) {
+      const paletteColors = [PALETTE.gold, PALETTE.rose, PALETTE.mint];
+      const paletteGlows = [PALETTE.goldGlow, PALETTE.roseGlow, PALETTE.mintGlow];
 
-        // Micro Dot at origin
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.start.x, p.start.y, 3.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = p.color;
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.arc(p.start.x, p.start.y, 7.5, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Delicate Tapered Entry Line
-        if (progress > 0.02) {
-          const reach = Math.min(1.0, progress * 8.0);
-          const targetX = p.start.x + (680 - p.start.x) * 0.3 * reach;
-          const targetY = p.start.y + (220 - p.start.y) * reach;
-
-          ctx.strokeStyle = p.color;
-          ctx.globalAlpha = 0.55;
-          ctx.lineWidth = 1.6;
-          ctx.beginPath();
-          ctx.moveTo(p.start.x, p.start.y);
-          ctx.lineTo(targetX, targetY);
-          ctx.stroke();
-        }
-      });
-      ctx.restore();
-    }
-
-    // --- CALLIGRAPHIC FUNNEL SWOOSH (STAGE 1) ---
-    function drawCalligraphicFunnelSwoosh(ctx, pillars, progress, scrollMotion) {
-      const steps = 90;
-      const maxSteps = Math.floor(steps * Math.min(1.0, progress * 1.3));
-
-      ctx.save();
-
-      // Minimalist: 2 Tapered Calligraphic Funnel Strands (Gold & Cyan)
-      const funnelStrands = [
-        { color: PALETTE.gold, glow: PALETTE.goldGlow, phase: 0 },
-        { color: PALETTE.cyan, glow: PALETTE.cyanGlow, phase: Math.PI }
-      ];
-
-      funnelStrands.forEach(strand => {
-        ctx.shadowColor = strand.glow;
-        ctx.shadowBlur = 8;
-        ctx.strokeStyle = strand.color;
-
-        let headPt = { x: 680, y: 220 };
-
-        for (let i = 1; i <= maxSteps; i++) {
-          const u = i / steps;
-          const funnelY = 220 + u * 420;
-          const radius = (190 * (1.0 - u)) + 24;
-          const ry = radius * 0.38;
-
-          // Calligraphic Swoosh Angle
-          const angle = u * Math.PI * 6 + strand.phase + scrollMotion * 0.6;
-          const x = 680 + Math.cos(angle) * radius;
-          const y = funnelY + Math.sin(angle) * ry;
-
-          // Variable Tapered Stroke Width (Calligraphic Brush Effect)
-          const strokeWidth = 1.2 + Math.sin(u * Math.PI) * 4.5;
-          ctx.lineWidth = strokeWidth;
-
-          const prevAngle = (u - 1 / steps) * Math.PI * 6 + strand.phase + scrollMotion * 0.6;
-          const prevRadius = (190 * (1.0 - (u - 1 / steps))) + 24;
-          const prevX = 680 + Math.cos(prevAngle) * prevRadius;
-          const prevY = (220 + (u - 1 / steps) * 420) + Math.sin(prevAngle) * (prevRadius * 0.38);
-
-          ctx.beginPath();
-          ctx.moveTo(prevX, prevY);
-          ctx.lineTo(x, y);
-          ctx.stroke();
-
-          if (i === maxSteps) headPt = { x, y };
-        }
-
-        // Micro Dot at leading tip
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(headPt.x, headPt.y, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = strand.color;
-        ctx.beginPath();
-        ctx.arc(headPt.x, headPt.y, 4.5, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      // Minimalist Dashed Orbital Rings with Floating Micro Dots
-      const ringLevels = [280, 420, 560];
-      ringLevels.forEach((cy, rIdx) => {
-        const ringT = (cy - 220) / 420;
-        if (ringT > progress * 1.3) return;
-
-        const rx = 190 * (1.0 - ringT) + 24;
-        const ry = rx * 0.38;
-
-        ctx.strokeStyle = rIdx % 2 === 0 ? PALETTE.rose : PALETTE.mint;
-        ctx.globalAlpha = 0.35;
-        ctx.lineWidth = 1.0;
-        ctx.setLineDash([3, 5]);
-        ctx.beginPath();
-        ctx.ellipse(680, cy, rx, ry, 0, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Solid Micro-Dots along ring (Matching User Screenshot!)
-        ctx.setLineDash([]);
-        const dotCount = 6;
-        for (let d = 0; d < dotCount; d++) {
-          const dotAngle = (d / dotCount) * Math.PI * 2 + scrollMotion * (rIdx % 2 === 0 ? 0.4 : -0.4);
-          const px = 680 + Math.cos(dotAngle) * rx;
-          const py = cy + Math.sin(dotAngle) * ry;
-
-          ctx.globalAlpha = 0.85;
-          ctx.fillStyle = rIdx % 2 === 0 ? PALETTE.rose : PALETTE.mint;
-          ctx.beginPath();
-          ctx.arc(px, py, 2.2, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      });
-
-      ctx.restore();
-    }
-
-    // --- FLUID CALLIGRAPHIC RIBBON SWOOSH (STAGE 2 - MATCHING REFERENCE IMAGE!) ---
-    function drawFluidCalligraphicRibbon(ctx, progress, scrollMotion) {
-      // Preserved exact path waypoints:
+      const tendrilCount = 3; // Reduced to exactly 3 elegant lines
       const waypoints = [
         { x: 680, y: 640 },
         { x: 650, y: 950 },
@@ -606,138 +463,89 @@ document.addEventListener('DOMContentLoaded', () => {
         { x: 650, y: 2450 }
       ];
 
-      const steps = 140;
-      const maxSteps = Math.floor(steps * progress);
+      const totalSteps = 220;
+      const maxSteps = Math.floor(totalSteps * progress);
 
       ctx.save();
 
-      // Reduced Line Count: 2 Primary Calligraphic Swoosh Ribbon Strokes!
-      const swooshes = [
-        { color: PALETTE.gold, glow: PALETTE.goldGlow, phase: 0, widthScale: 1.0 },
-        { color: PALETTE.mint, glow: PALETTE.mintGlow, phase: Math.PI * 0.75, widthScale: 0.7 }
-      ];
+      // Render 3 Elegant Organic Tendril Threads
+      for (let t = 0; t < tendrilCount; t++) {
+        const color = paletteColors[t % paletteColors.length];
+        const glow = paletteGlows[t % paletteGlows.length];
+        const phase = (t / tendrilCount) * Math.PI * 2;
 
-      // 1. Draw Minimalist Orbital Ellipses & Micro-Dots at Path Inflection Loops
-      const orbitalNodes = [
-        { x: 650, y: 950, rx: 140, ry: 60, color: PALETTE.mint, trigger: 0.15 },
-        { x: 1080, y: 1200, rx: 160, ry: 70, color: PALETTE.gold, trigger: 0.35 },
-        { x: 260, y: 1550, rx: 150, ry: 65, color: PALETTE.rose, trigger: 0.55 },
-        { x: 650, y: 2450, rx: 135, ry: 55, color: PALETTE.amber, trigger: 0.85 }
-      ];
+        ctx.shadowColor = glow;
+        ctx.shadowBlur = 6;
+        ctx.strokeStyle = color;
 
-      orbitalNodes.forEach((orb, oIdx) => {
-        if (progress < orb.trigger) return;
+        const pathPoints = [];
 
-        // Faint Dashed Orbital Guide Ellipse
-        ctx.strokeStyle = orb.color;
-        ctx.globalAlpha = 0.4;
-        ctx.lineWidth = 1.1;
-        ctx.setLineDash([4, 6]);
+        for (let step = 0; step <= maxSteps; step++) {
+          const u = step / totalSteps;
+          let x, y, z = 0;
+
+          if (u < 0.40) {
+            // STAGE 1: Top Dynamic Fanned Horns & Vortex Funnel (Matching Reference Image!)
+            const funnelT = u / 0.40;
+            const cy = 165 + funnelT * (640 - 165);
+
+            // Radius tapers from wide fanned horns (220px) down to tight core (20px)
+            const radius = (220 * Math.pow(1.0 - funnelT, 1.2)) + 20;
+            const ry = radius * 0.38;
+
+            // Spiral twist angle
+            const angle = funnelT * Math.PI * 6 + phase + scrollMotion * 0.6;
+            z = Math.sin(angle);
+
+            // Wing flare out at top (matching reference image horns!)
+            const wingFlare = Math.pow(1.0 - funnelT, 2.0) * 80 * Math.sin(phase * 2);
+
+            x = 680 + Math.cos(angle) * radius + wingFlare;
+            y = cy + Math.sin(angle) * ry;
+          } else {
+            // STAGE 2: Seamless Tendril Stream Sweep through Citadel, Minaret, and Road Base
+            const sweepT = (u - 0.40) / 0.60;
+            const spinePt = getSplinePoint(waypoints, sweepT);
+            const nextPt = getSplinePoint(waypoints, Math.min(1.0, sweepT + 0.015));
+            const angle = Math.atan2(nextPt.y - spinePt.y, nextPt.x - spinePt.x);
+            const normalAngle = angle + Math.PI / 2;
+
+            const strandOffset = (28 * Math.sin(sweepT * Math.PI * 10 + phase + scrollMotion * 0.5)
+              + 12 * Math.cos(sweepT * Math.PI * 16 - scrollMotion * 0.3)) * (0.4 + (t % 4) * 0.25);
+
+            x = spinePt.x + Math.cos(normalAngle) * strandOffset;
+            y = spinePt.y + Math.sin(normalAngle) * strandOffset;
+          }
+
+          pathPoints.push({ x, y, z });
+        }
+
+        if (pathPoints.length < 2) continue;
+
+        // 1. Render Fine Tendril Thread Line (Matching Reference Image Thin Strokes!)
+        ctx.globalAlpha = 0.85;
+        ctx.lineWidth = 1.1 + (t % 3) * 0.3; // Fine 1.1px - 1.7px stroke
         ctx.beginPath();
-        ctx.ellipse(orb.x, orb.y, orb.rx, orb.ry, 0.1, 0, Math.PI * 2);
+        pathPoints.forEach((p, i) => {
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        });
         ctx.stroke();
 
-        // Solid Micro Dots (Matching User Screenshot!)
-        ctx.setLineDash([]);
-        const dotCount = 8;
-        for (let d = 0; d < dotCount; d++) {
-          const dotAngle = (d / dotCount) * Math.PI * 2 + scrollMotion * (oIdx % 2 === 0 ? 0.45 : -0.45);
-          const px = orb.x + Math.cos(dotAngle) * orb.rx;
-          const py = orb.y + Math.sin(dotAngle) * orb.ry;
+        // 2. Render Solid Micro-Dots along Tendril Thread (Matching Reference Image Dots!)
+        ctx.globalAlpha = 0.95;
+        pathPoints.forEach((p, i) => {
+          if ((i + t * 3) % 9 === 0) {
+            // Dynamic micro-dot radius (1.2px to 2.8px)
+            const dotRadius = 1.3 + Math.sin(i * 0.2 + phase) * 1.3;
 
-          ctx.globalAlpha = 0.85;
-          ctx.fillStyle = orb.color;
-          ctx.beginPath();
-          ctx.arc(px, py, 2.3, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      });
-
-      // 2. Draw Calligraphic Tapered Brush Ribbon Swoosh Lines
-      swooshes.forEach(swoosh => {
-        ctx.shadowColor = swoosh.glow;
-        ctx.shadowBlur = 10;
-        ctx.globalAlpha = 1.0;
-        ctx.setLineDash([]);
-
-        const points = [];
-        for (let i = 0; i <= maxSteps; i++) {
-          const u = i / steps;
-          const spinePt = getSplinePoint(waypoints, u);
-          const nextPt = getSplinePoint(waypoints, Math.min(1.0, u + 0.015));
-          const angle = Math.atan2(nextPt.y - spinePt.y, nextPt.x - spinePt.x);
-          const normalAngle = angle + Math.PI / 2;
-
-          // Calligraphic Fluid Loop Offset
-          const offset = (32 * Math.sin(u * Math.PI * 8 + swoosh.phase + scrollMotion * 0.5)
-            + 10 * Math.cos(u * Math.PI * 14 - scrollMotion * 0.3)) * swoosh.widthScale;
-
-          const x = spinePt.x + Math.cos(normalAngle) * offset;
-          const y = spinePt.y + Math.sin(normalAngle) * offset;
-
-          // Calligraphic Dynamic Width Taper (Thick in swoosh body, thin at tips - matching image!)
-          const widthTaper = (2.0 + Math.sin(u * Math.PI) * 9.5) * swoosh.widthScale;
-
-          points.push({ x, y, width: widthTaper, u });
-        }
-
-        if (points.length < 2) return;
-
-        // Render Calligraphic Multi-Bristle Stroke (Tapered Ink Swoosh Effect)
-        ctx.strokeStyle = swoosh.color;
-
-        for (let i = 1; i < points.length; i++) {
-          const p1 = points[i - 1];
-          const p2 = points[i];
-
-          // Main Calligraphic Core Line with Dynamic Width
-          ctx.lineWidth = p2.width;
-          ctx.beginPath();
-          ctx.moveTo(p1.x, p1.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.stroke();
-
-          // Delicate Parallel Bristle Line (Adds calligraphic brush texture!)
-          ctx.lineWidth = 1.0;
-          ctx.globalAlpha = 0.5;
-          ctx.beginPath();
-          ctx.moveTo(p1.x + 2, p1.y - 1);
-          ctx.lineTo(p2.x + 2, p2.y - 1);
-          ctx.stroke();
-          ctx.globalAlpha = 1.0;
-
-          // Solid Micro-Dots placed along Calligraphic Loop Apexes
-          if (i % 8 === 0) {
-            ctx.fillStyle = swoosh.color;
+            ctx.fillStyle = color;
             ctx.beginPath();
-            ctx.arc(p2.x, p2.y, 2.4, 0, Math.PI * 2);
+            ctx.arc(p.x, p.y, dotRadius, 0, Math.PI * 2);
             ctx.fill();
           }
-        }
-
-        // Calligraphic Snake-Head Dot at leading tip
-        const headPt = points[points.length - 1];
-        if (headPt) {
-          ctx.shadowColor = swoosh.color;
-          ctx.shadowBlur = 12;
-
-          ctx.strokeStyle = swoosh.color;
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.arc(headPt.x, headPt.y, 10.0, 0, Math.PI * 2);
-          ctx.stroke();
-
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath();
-          ctx.arc(headPt.x, headPt.y, 4.0, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.fillStyle = swoosh.color;
-          ctx.beginPath();
-          ctx.arc(headPt.x, headPt.y, 7.0, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      });
+        });
+      }
 
       ctx.restore();
     }
