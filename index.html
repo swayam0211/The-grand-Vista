@@ -69,9 +69,9 @@
       <img src="images from figma/layer-1-1595x5548.png" id="bg-bottom" class="p-layer bg-layer bg-flipped"
         style="left:-77px; top:5548px; width:1595px; height:5548px;" alt="Sky Background Bottom">
 
-      <!-- Dark Atmosphere Transition Band -->
+      <!-- Dark Atmosphere Transition Band (Blends top & bottom background seam at 5548px) -->
       <img src="images from figma/rectangle-1.png" id="atmosphere-band" class="p-layer mid-layer"
-        style="left:25px; top:5330px; width:1440px; height:836px;" alt="Atmospheric Layer">
+        style="left:-1000px; top:5120px; width:8440px; height:860px; z-index:3; opacity:1;" alt="Atmospheric Layer">
 
       <!-- ================= SCENE 1: CANOPY & FLOATING CLOUDS (Y: 0 - 1400) ================= -->
       <!-- Giant Top Tree Canopy Attachment -->
@@ -79,7 +79,7 @@
         style="left:0px; top:0px; width:1440px; height:554px;" alt="Tree Canopy Top">
 
       <!-- Foreground Left Bare Tree -->
-      <img src="images from figma/tree-bare-left.png" id="tree-bare-left" class="p-layer fg-layer"
+      <img src="images from figma/giant_tree.png" id="tree-bare-left" class="p-layer fg-layer"
         style="left:-53px; top:2px; width:1323px; height:2596px;" alt="Bare Tree Left">
 
       <!-- Right Giant Tree Overlay -->
@@ -146,17 +146,35 @@
 
       <!-- Vignette Atmospheric Frame Overlay for Train & Bridge Pillars Area -->
       <img src="images from figma/city-panorama-lower.png" id="bridge-vignette-overlay" class="p-layer sky-layer"
-        style="left:-50px; top:2915px; width:1640px; height:950px; pointer-events:none; z-index:75; opacity:1;"
+        style="left:-110px; top:3315px; width:1690px; height:650px; pointer-events:none; z-index:95; opacity:1; transform: rotate(180deg);"
         alt="Bridge Pillars Vignette Overlay">
 
       <!-- ================= SCENE 4: CITADEL ARCHITECTURE (Y: 4200 - 6300) ================= -->
       <!-- Sprawling Citadel Buildings -->
       <img src="images from figma/building-cluster-large.png" id="building-cluster-large" class="p-layer mid-layer"
-        style="left:-30px; top:3796px; width:750px; height:890px;" alt="Large Citadel Cluster">
+        style="left:-50px; top:3796px; width:850px; height:990px;" alt="Large Citadel Cluster">
 
       <!-- Mixed Architecture Layer -->
       <img src="images from figma/building-cluster-mixed.png" id="building-cluster-mixed" class="p-layer bg-depth-layer"
         style="left:-103px; top:3787px; width:1373px; height:1163px;" alt="Mixed Architecture Cluster">
+
+      <!-- Scene IV Containerless Dark Brown Typography -->
+      <div id="scene-4-text-block" class="p-layer"
+        style="left:760px; top:3880px; width:560px; pointer-events:none; z-index:50; display:flex; flex-direction:column; gap:16px;">
+        <span
+          style="font-family:'Inter', sans-serif; font-size:0.75rem; font-weight:700; letter-spacing:0.28em; color:#412c06; text-transform:uppercase;">
+          SCENE IV • ARCHITECTURAL CITADEL
+        </span>
+        <h2
+          style="font-family:'Cinzel', serif; font-size:2.2rem; font-weight:700; letter-spacing:0.08em; color:#412c06; line-height:1.25; text-shadow:0 2px 12px rgba(65, 44, 6, 0.18);">
+          THE ANCIENT CITADEL & GRAND SANCTUARY
+        </h2>
+        <p
+          style="font-family:'Inter', sans-serif; font-size:0.95rem; font-weight:500; line-height:1.7; color:#503104; opacity:0.92; max-width:480px;">
+          Rising above the valley river, the timbered gable roofs and historic minarets of the sprawling citadel stand
+          against the golden horizon—a tribute to timeless architectural heritage and grand sanctuary design.
+        </p>
+      </div>
 
       <!-- Mathematical Blueprint & Architectural Geometry Canvas Overlay (Scenes 4 & 5) -->
       <canvas id="geometry-canvas" class="p-layer video-canvas"
@@ -166,12 +184,14 @@
       <canvas id="section-5-canvas" class="p-layer mid-layer" width="1440" height="900"
         style="left:0px; top:5000px; width:1440px; height:900px; pointer-events:none; z-index:15;"></canvas>
 
-      <!-- ================= ABSOLUTE BOTTOM TERMINAL: PARALLAX STRETCH ARROW & TEXT (Y: 6250) ================= -->
-      <div id="terminal-end-section" class="p-layer" style="left:0px; top:6250px; width:1440px; height:450px; z-index:100; pointer-events:auto; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-        
+      <!-- ================= ABSOLUTE BOTTOM TERMINAL: PARALLAX STRETCH ARROW & TEXT (Y: 6650) ================= -->
+      <div id="terminal-end-section" class="p-layer"
+        style="left:0px; top:6650px; width:1440px; height:450px; z-index:100; pointer-events:auto; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+
         <!-- Parallax Stretching Upward Arrow -->
         <div id="end-arrow-wrap" class="end-arrow-container" style="cursor:pointer;" title="Scroll Up to Top">
-          <svg id="end-arrow-svg" width="48" height="72" viewBox="0 0 24 36" fill="none" stroke="#d4af37" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg id="end-arrow-svg" width="48" height="72" viewBox="0 0 24 36" fill="none" stroke="#d4af37"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="32" x2="12" y2="4"></line>
             <polyline points="4 12 12 4 20 12"></polyline>
           </svg>
@@ -179,7 +199,8 @@
 
         <!-- Simple Containerless Typography -->
         <span class="end-simple-tag">EXHIBITION TERMINAL • END OF THE JOURNEY</span>
-        <h2 id="end-scroll-text" class="end-simple-title" style="cursor:pointer;" title="Click to Scroll Up">SCROLL UP TO REPLAY</h2>
+        <h2 id="end-scroll-text" class="end-simple-title" style="cursor:pointer;" title="Click to Scroll Up">SCROLL UP
+          TO REPLAY</h2>
       </div>
 
     </main>

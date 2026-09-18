@@ -19,9 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set CSS variable for transform: scale()
     document.documentElement.style.setProperty('--scale', currentScale);
 
-    // Update scroll wrapper height to maintain correct scrollable length (6700px)
+    // Update scroll wrapper height to maintain correct scrollable length (7100px)
     if (wrapper) {
-      wrapper.style.height = `${6700 * currentScale}px`;
+      wrapper.style.height = `${7100 * currentScale}px`;
     }
 
     // Refresh ScrollTrigger to recalculate distances based on new heights
@@ -38,14 +38,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1. LENIS SMOOTH SCROLL INITIALIZATION
   // ==========================================================================
   const lenis = new Lenis({
-    duration: 1.4,
+    duration: 2.4,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     orientation: 'vertical',
     gestureOrientation: 'vertical',
     smoothWheel: true,
-    wheelMultiplier: 0.85,
-    touchMultiplier: 1.5,
-    lerp: 0.08, // Ultra-smooth physics lerp across all devices!
+    wheelMultiplier: 0.42,
+    touchMultiplier: 0.9,
+    lerp: 0.04, // Museum-grade smooth physics lerp
   });
 
   lenis.on('scroll', ScrollTrigger.update);
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
       trigger: mainTrigger,
       start: 'top top',
       end: s(600),
-      scrub: 0.8,
+      scrub: 1.2,
       invalidateOnRefresh: true,
     }
   });
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   lenis.on('scroll', (e) => {
     const scrollY = Math.max(0, e.scroll);
-    const scaledTotalHeight = (6700 * currentScale) - window.innerHeight;
+    const scaledTotalHeight = (7100 * currentScale) - window.innerHeight;
     const progress = Math.min(100, Math.round((scrollY / scaledTotalHeight) * 100));
     if (scrollPercentText) scrollPercentText.textContent = `${progress}%`;
 
@@ -138,21 +138,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Handle 0.1s Tactile Magnetic Slowdown on arrival at any new section
+    // Handle Tactile Magnetic Slowdown on arrival at any new section (prevents fast scroll overshoot)
     sceneWaypoints.forEach(wp => {
       const targetY = wp.pos * currentScale;
       const dist = Math.abs(scrollY - targetY);
 
-      if (dist < 40 * currentScale && detectedScene !== lastSnapScene && !isSnapHolding) {
+      if (dist < 60 * currentScale && detectedScene !== lastSnapScene && !isSnapHolding) {
         lastSnapScene = detectedScene;
         isSnapHolding = true;
 
-        // Apply 0.1s tactile magnetic slowdown lerp
-        lenis.options.lerp = 0.032;
+        // Apply 0.28s gentle tactile magnetic slowdown lerp
+        lenis.options.lerp = 0.025;
         setTimeout(() => {
-          lenis.options.lerp = 0.08;
+          lenis.options.lerp = 0.05;
           isSnapHolding = false;
-        }, 140);
+        }, 280);
 
         // Flash glowing ring pulse on active nav dot
         const activeDot = document.querySelector(`.nav-dot[data-scene="${detectedScene}"]`);
@@ -300,9 +300,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Vignette Atmospheric Frame Overlay Parallax for Train & Bridge Pillars Area
   gsap.fromTo('#bridge-vignette-overlay',
-    { opacity: 0.2, y: 60 },
+    { opacity: 1.0, rotate: 180, y: 60 },
     {
-      opacity: 0.95,
+      opacity: 1.0,
+      rotate: 180,
       y: -60,
       ease: 'none',
       scrollTrigger: {
@@ -314,63 +315,69 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   );
 
-  // --- SCENE 4 PARALLAX: CITADEL ARCHITECTURE (Y: 3100 - 5200) ---
-  // 1. Building Cluster Mixed comes from left side before reaching 3787px and places on screen
+  // --- SCENE 4 PARALLAX: CITADEL ARCHITECTURE & CONTAINERLESS TYPOGRAPHY (Y: 3100 - 5200) ---
+  // 1. Building Cluster Mixed rises vertically with multi-layered depth parallax
   gsap.fromTo('#building-cluster-mixed',
-    { x: -650, opacity: 0.2 },
+    { y: 140, scale: 0.94, opacity: 0.2 },
     {
-      x: 0,
+      y: -40,
+      scale: 1.02,
+      opacity: 1.0,
+      ease: 'power1.out',
+      scrollTrigger: {
+        trigger: mainTrigger,
+        start: s(3100),
+        end: s(4300),
+        scrub: 1.2,
+      }
+    }
+  );
+
+  // 2. Building Cluster Large rises gracefully into view
+  gsap.fromTo('#building-cluster-large',
+    { y: 160, scale: 0.95, opacity: 0.2 },
+    {
+      y: -50,
+      scale: 1.04,
       opacity: 1.0,
       ease: 'power2.out',
       scrollTrigger: {
         trigger: mainTrigger,
-        start: s(3100),
-        end: s(3650),
-        scrub: 0.8,
+        start: s(3300),
+        end: s(4500),
+        scrub: 1.2,
       }
     }
   );
 
-  // 2. Building Cluster Large (above it) fades opacity from 0 to 100% at fixed location
-  gsap.fromTo('#building-cluster-large',
-    { opacity: 0 },
+  // 3. Containerless Dark Brown Typography Float Reveal (Right Side Open Space)
+  gsap.fromTo('#scene-4-text-block',
+    { y: 90, opacity: 0 },
+    {
+      y: -30,
+      opacity: 1.0,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: mainTrigger,
+        start: s(3400),
+        end: s(4300),
+        scrub: 1.0,
+      }
+    }
+  );
+
+  // 4. Dark Atmosphere Transition Band (100% solid opacity hiding background seam at 5548px)
+  gsap.fromTo('#atmosphere-band',
+    { opacity: 1.0, y: 30 },
     {
       opacity: 1.0,
-      ease: 'power1.inOut',
-      scrollTrigger: {
-        trigger: mainTrigger,
-        start: s(3650),
-        end: s(3950),
-        scrub: 0.6,
-      }
-    }
-  );
-
-  // 3. As scroll continues down, Building Cluster Large fades opacity from 100% down to 60%
-  gsap.fromTo('#building-cluster-large',
-    { opacity: 1.0 },
-    {
-      opacity: 0.6,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: mainTrigger,
-        start: s(4100),
-        end: s(5200),
-        scrub: true,
-      }
-    }
-  );
-
-  gsap.fromTo('#atmosphere-band',
-    { opacity: 0.4 },
-    {
-      opacity: 1,
+      y: -30,
       ease: 'none',
       scrollTrigger: {
         trigger: mainTrigger,
         start: s(4200),
         end: s(5800),
-        scrub: true,
+        scrub: 1.0,
       }
     }
   );  // ==========================================================================
@@ -469,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ScrollTrigger.create({
       trigger: mainTrigger,
       start: s(5000),
-      end: s(6200),
+      end: s(6600),
       scrub: true,
       onUpdate: (self) => {
         s5TargetProgress = self.progress;
@@ -482,7 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Exact Zero-Lag Viewport Pinning (Stays 100% stationary without any lerp lag or double-transform bugs!)
       const currentScrollY = lenis ? lenis.actualScroll : (window.scrollY || 0);
       const scaledPinStart = 5000 * currentScale;
-      const scaledPinEnd = 6200 * currentScale;
+      const scaledPinEnd = 6600 * currentScale;
 
       let targetPinY = 0;
       if (currentScrollY >= scaledPinStart && currentScrollY <= scaledPinEnd) {
@@ -509,11 +516,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderSection5(progress) {
       ctx5.clearRect(0, 0, cw, ch);
 
-      // Phase 1: Manual Hand-Drawn Sketching (Progress 0.0 -> 0.45)
-      const sketchProg = Math.min(1.0, progress / 0.45);
+      // Phase 1: Manual Hand-Drawn Sketching (Progress 0.0 -> 0.70) - Expanded for 2.5x longer pencil tracing!
+      const sketchProg = Math.min(1.0, progress / 0.70);
 
-      // Phase 2: Water Drop Fluid Color Reveal (Progress 0.40 -> 1.0)
-      const fluidProg = Math.max(0.0, (progress - 0.40) / 0.60);
+      // Phase 2: Water Drop Fluid Color Reveal (Progress 0.55 -> 1.0)
+      const fluidProg = Math.max(0.0, (progress - 0.55) / 0.45);
 
       // 1. RENDER MANUAL LINE-BY-LINE HAND SKETCHING
       sketchMaskCtx.clearRect(0, 0, cw, ch);
@@ -1153,8 +1160,8 @@ document.addEventListener('DOMContentLoaded', () => {
       ease: 'none',
       scrollTrigger: {
         trigger: mainTrigger,
-        start: s(5600),
-        end: s(6600),
+        start: s(6000),
+        end: s(7000),
         scrub: 0.8,
       }
     }
@@ -1169,8 +1176,8 @@ document.addEventListener('DOMContentLoaded', () => {
       ease: 'power2.out',
       scrollTrigger: {
         trigger: mainTrigger,
-        start: s(5600),
-        end: s(6600),
+        start: s(6000),
+        end: s(7000),
         scrub: 0.8,
       }
     }
