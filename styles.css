@@ -13,13 +13,16 @@
 }
 
 /* Base Resets */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   background-color: var(--bg-dark);
   color: var(--text-light);
@@ -32,7 +35,8 @@ html, body {
 .scroll-wrapper {
   width: 100%;
   position: relative;
-  overflow: hidden; /* Prevent horizontal scroll bars */
+  overflow: hidden;
+  /* Prevent horizontal scroll bars */
 }
 
 /* Master Parallax Canvas */
@@ -41,10 +45,10 @@ html, body {
   top: 0;
   left: 0;
   width: 1440px;
-  height: 6350px;
+  height: 6700px;
   transform-origin: top left;
   transform: scale(var(--scale, 1));
-  box-shadow: 0 0 100px rgba(0,0,0,0.8);
+  box-shadow: 0 0 100px rgba(0, 0, 0, 0.8);
   background: var(--bg-dark);
 }
 
@@ -67,22 +71,57 @@ html, body {
 }
 
 /* Z-Index Hierarchy */
-.bg-layer { z-index: 1; }
-.bg-depth-layer { z-index: 5; }
-.mid-layer { z-index: 15; }
-.sky-layer { z-index: 25; }
+.bg-layer {
+  z-index: 1;
+}
+
+.bg-depth-layer {
+  z-index: 5;
+}
+
+.mid-layer {
+  z-index: 15;
+}
+
+.sky-layer {
+  z-index: 25;
+}
 
 /* Section 1 Layering Stack & HD Enhancements */
-#tree-bare-left { z-index: 30; }          /* Lowest layer of foreground trees */
-#tree-top-canopy { z-index: 35; }         /* Above bare tree, below clouds & giant overlay */
-#trees-giant-overlay { z-index: 40; }     /* Above both tree canopy and bare tree */
-#figures-silhouette { 
-  z-index: 45; 
-  filter: contrast(115%) brightness(92%) drop-shadow(0 8px 20px rgba(0,0,0,0.55));
+#tree-bare-left {
+  z-index: 30;
 }
-.sky-cloud { z-index: 50; }               /* Covers section on top layout on page load */
-.video-canvas { z-index: 60; }
-.curtain-layer { z-index: 100; }          /* Giant cloud curtain overlay top */
+
+/* Lowest layer of foreground trees */
+#tree-top-canopy {
+  z-index: 35;
+}
+
+/* Above bare tree, below clouds & giant overlay */
+#trees-giant-overlay {
+  z-index: 40;
+}
+
+/* Above both tree canopy and bare tree */
+#figures-silhouette {
+  z-index: 45;
+  filter: contrast(115%) brightness(92%) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.55));
+}
+
+.sky-cloud {
+  z-index: 50;
+}
+
+/* Covers section on top layout on page load */
+.video-canvas {
+  z-index: 60;
+}
+
+.curtain-layer {
+  z-index: 100;
+}
+
+/* Giant cloud curtain overlay top */
 
 /* HD Sharpness & Contrast Optimization for Tree Cutouts */
 #tree-top-canopy,
@@ -241,12 +280,31 @@ html, body {
   transition: all 0.3s ease;
 }
 
-.nav-dot:hover, .nav-dot.active {
+.nav-dot:hover,
+.nav-dot.active {
   border-color: var(--gold-primary);
   color: var(--gold-accent);
   background: rgba(212, 175, 55, 0.2);
   box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
   transform: scale(1.15);
+}
+
+.nav-dot.active-snap {
+  animation: dotPulseSnap 0.8s ease-out;
+}
+
+@keyframes dotPulseSnap {
+  0% { transform: scale(1.0); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.9); }
+  50% { transform: scale(1.35); box-shadow: 0 0 25px 8px rgba(212, 175, 55, 0.6); }
+  100% { transform: scale(1.15); box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+}
+
+.hud-tag {
+  transition: color 0.4s ease, text-shadow 0.4s ease;
+}
+.hud-tag.scene-highlight {
+  color: #fff;
+  text-shadow: 0 0 12px rgba(212, 175, 55, 0.9);
 }
 
 /* Responsive Scaling for Narrower Displays */
@@ -255,138 +313,12 @@ html, body {
     display: flex;
     justify-content: center;
   }
+
   .parallax-canvas {
     transform-origin: top center;
   }
 }
 
-/* ==========================================================================
-   VISUAL EDITOR STYLES
-   ========================================================================== */
-body.edit-mode .p-layer {
-  pointer-events: auto !important;
-  cursor: crosshair;
-  transition: outline 0.1s ease;
-}
-
-body.edit-mode .p-layer:hover {
-  outline: 2px dashed var(--gold-primary);
-}
-
-body.edit-mode .p-layer.editor-selected {
-  outline: 3px solid #00f0ff !important;
-  /* Removed z-index:9999 and filters so it doesn't break layer depth or cover the screen! */
-}
-
-.editor-panel {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 380px;
-  background: var(--hud-bg);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--hud-border);
-  border-radius: 12px;
-  padding: 20px;
-  z-index: 10000;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-  font-family: 'Inter', sans-serif;
-  color: var(--text-light);
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease;
-}
-
-.editor-panel.hidden {
-  transform: translateY(120%) scale(0.9);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.editor-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  padding-bottom: 12px;
-  margin-bottom: 16px;
-}
-
-.editor-header h3 {
-  font-family: 'Cinzel', serif;
-  color: #00f0ff;
-  font-size: 1.1rem;
-  letter-spacing: 0.1em;
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-.icon-btn:hover { color: #fff; }
-
-.editor-selected-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-bottom: 16px;
-}
-#editor-target-id {
-  color: var(--gold-accent);
-  font-weight: 600;
-}
-
-.editor-group {
-  margin-bottom: 16px;
-}
-.editor-group label {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.editor-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.editor-row input[type="range"] {
-  flex: 1;
-  accent-color: #00f0ff;
-}
-
-.editor-row input[type="number"] {
-  width: 70px;
-  background: rgba(0,0,0,0.4);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: #fff;
-  padding: 6px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-}
-
-.editor-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-.hud-btn.primary {
-  background: rgba(0, 240, 255, 0.15);
-  border-color: #00f0ff;
-  color: #00f0ff;
-}
-.hud-btn.primary:hover {
-  background: rgba(0, 240, 255, 0.3);
-  box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
-}
 
 /* Creative Drawing Toolbar Styles */
 .draw-tool-btn {
@@ -402,10 +334,12 @@ body.edit-mode .p-layer.editor-selected {
   flex: 1;
   text-align: center;
 }
+
 .draw-tool-btn:hover {
   background: rgba(255, 215, 0, 0.2);
   border-color: #ffd700;
 }
+
 .draw-tool-btn.active {
   background: rgba(0, 243, 255, 0.25);
   border-color: #00f3ff;
@@ -423,13 +357,61 @@ body.edit-mode .p-layer.editor-selected {
   display: inline-block;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+
 .color-swatch:hover {
   transform: scale(1.2);
 }
+
 .color-swatch.active {
   transform: scale(1.25);
   border: 2px solid #fff;
   box-shadow: 0 0 10px currentColor;
+}
+
+/* ==========================================================================
+   TERMINAL END SECTION (CONTAINERLESS TEXT & PARALLAX STRETCH ARROW)
+   ========================================================================== */
+.end-arrow-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.7));
+  transition: filter 0.3s ease;
+}
+.end-arrow-container:hover {
+  filter: drop-shadow(0 0 28px rgba(212, 175, 55, 1.0));
+}
+
+#end-arrow-svg {
+  transform-origin: bottom center;
+  transition: transform 0.1s ease-out;
+}
+
+.end-simple-tag {
+  font-family: 'Inter', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: #414219;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.end-simple-title {
+  font-family: 'Cinzel', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #f5f5f7;
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.45);
+  transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.end-simple-title:hover {
+  color: #ffffff;
+  text-shadow: 0 0 35px rgba(212, 175, 55, 0.85);
+  transform: scale(1.04);
 }
 
 /* ==========================================================================
@@ -440,6 +422,3 @@ body.edit-mode .p-layer.editor-selected {
   height: 900px;
   display: block;
 }
-
-
-

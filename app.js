@@ -19,9 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set CSS variable for transform: scale()
     document.documentElement.style.setProperty('--scale', currentScale);
 
-    // Update scroll wrapper height to maintain correct scrollable lengt    // Update scroll wrapper height to maintain correct scrollable length (6600px)
+    // Update scroll wrapper height to maintain correct scrollable length (6700px)
     if (wrapper) {
-      wrapper.style.height = `${6600 * currentScale}px`;
+      wrapper.style.height = `${6700 * currentScale}px`;
     }
 
     // Refresh ScrollTrigger to recalculate distances based on new heights
@@ -38,10 +38,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1. LENIS SMOOTH SCROLL INITIALIZATION
   // ==========================================================================
   const lenis = new Lenis({
-    duration: 1.2,
+    duration: 1.4,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    orientation: 'vertical',
+    gestureOrientation: 'vertical',
     smoothWheel: true,
-    touchMultiplier: 2,
+    wheelMultiplier: 0.85,
+    touchMultiplier: 1.5,
+    lerp: 0.08, // Ultra-smooth physics lerp across all devices!
   });
 
   lenis.on('scroll', ScrollTrigger.update);
@@ -101,36 +105,94 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ==========================================================================
-  // 4. SCROLL DEPTH INDICATOR & SIDE NAV DOTS
+  // 4. SECTION WAYPOINT MAGNET SNAPPING & DEPTH INDICATOR
   // ==========================================================================
   const scrollPercentText = document.getElementById('scroll-percent');
+  const hudSceneTag = document.getElementById('hud-scene-tag');
   const navDots = document.querySelectorAll('.nav-dot');
+
+  // Scene Waypoint Configurations (Unscaled target pixel positions & titles)
+  const sceneWaypoints = [
+    { num: 1, pos: 0, title: "EXHIBITION • SCENE I — THE CANOPY SKY" },
+    { num: 2, pos: 1400, title: "EXHIBITION • SCENE II — HORIZON & SILHOUETTES" },
+    { num: 3, pos: 2600, title: "EXHIBITION • SCENE III — THE RAILWAY BRIDGE" },
+    { num: 4, pos: 3787, title: "EXHIBITION • SCENE IV — SPRAWLING CITADEL" },
+    { num: 5, pos: 5000, title: "EXHIBITION • SCENE V — GOLDEN SANCTUARY REVEAL" }
+  ];
+
+  let currentActiveScene = 1;
+  let lastSnapScene = 0;
+  let isSnapHolding = false;
 
   lenis.on('scroll', (e) => {
     const scrollY = Math.max(0, e.scroll);
-    // Use scaled total height for percentage (6600px)
-    const scaledTotalHeight = (6600 * currentScale) - window.innerHeight;
+    const scaledTotalHeight = (6700 * currentScale) - window.innerHeight;
     const progress = Math.min(100, Math.round((scrollY / scaledTotalHeight) * 100));
     if (scrollPercentText) scrollPercentText.textContent = `${progress}%`;
 
-    let activeScene = 1;
-    if (scrollY > 4800 * currentScale) activeScene = 5;
-    else if (scrollY > 3600 * currentScale) activeScene = 4;
-    else if (scrollY > 2600 * currentScale) activeScene = 3;
-    else if (scrollY > 1400 * currentScale) activeScene = 2;
-
-    navDots.forEach(dot => {
-      const sceneNum = parseInt(dot.dataset.scene, 10);
-      dot.classList.toggle('active', sceneNum === activeScene);
+    // Determine Active Scene based on scaled Y
+    let detectedScene = 1;
+    sceneWaypoints.forEach(wp => {
+      if (scrollY >= (wp.pos - 200) * currentScale) {
+        detectedScene = wp.num;
+      }
     });
+
+    // Handle 0.1s Tactile Magnetic Slowdown on arrival at any new section
+    sceneWaypoints.forEach(wp => {
+      const targetY = wp.pos * currentScale;
+      const dist = Math.abs(scrollY - targetY);
+
+      if (dist < 40 * currentScale && detectedScene !== lastSnapScene && !isSnapHolding) {
+        lastSnapScene = detectedScene;
+        isSnapHolding = true;
+
+        // Apply 0.1s tactile magnetic slowdown lerp
+        lenis.options.lerp = 0.032;
+        setTimeout(() => {
+          lenis.options.lerp = 0.08;
+          isSnapHolding = false;
+        }, 140);
+
+        // Flash glowing ring pulse on active nav dot
+        const activeDot = document.querySelector(`.nav-dot[data-scene="${detectedScene}"]`);
+        if (activeDot) {
+          activeDot.classList.remove('active-snap');
+          void activeDot.offsetWidth; // Trigger reflow for restart
+          activeDot.classList.add('active-snap');
+        }
+
+        // Highlight HUD Scene Tag
+        if (hudSceneTag) {
+          const wpData = sceneWaypoints.find(w => w.num === detectedScene);
+          if (wpData) hudSceneTag.textContent = wpData.title;
+          hudSceneTag.classList.add('scene-highlight');
+          setTimeout(() => hudSceneTag.classList.remove('scene-highlight'), 600);
+        }
+      }
+    });
+
+    if (detectedScene !== currentActiveScene) {
+      currentActiveScene = detectedScene;
+
+      navDots.forEach(dot => {
+        const sceneNum = parseInt(dot.dataset.scene, 10);
+        dot.classList.toggle('active', sceneNum === currentActiveScene);
+      });
+
+      const activeWp = sceneWaypoints.find(w => w.num === currentActiveScene);
+      if (hudSceneTag && activeWp) {
+        hudSceneTag.textContent = activeWp.title;
+      }
+    }
   });
 
   navDots.forEach(dot => {
     dot.addEventListener('click', () => {
       const sceneNum = parseInt(dot.dataset.scene, 10);
-      const targets = [0, 0, 1400, 2600, 3600, 4800];
-      const targetY = (targets[sceneNum] || 0) * currentScale;
-      lenis.scrollTo(targetY, { duration: 1.8 });
+      const wp = sceneWaypoints.find(w => w.num === sceneNum);
+      const targetY = (wp ? wp.pos : 0) * currentScale;
+      lenis.scrollTo(targetY, { duration: 1.6 });
     });
   });
 
@@ -236,6 +298,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Vignette Atmospheric Frame Overlay Parallax for Train & Bridge Pillars Area
+  gsap.fromTo('#bridge-vignette-overlay',
+    { opacity: 0.2, y: 60 },
+    {
+      opacity: 0.95,
+      y: -60,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: mainTrigger,
+        start: s(2200),
+        end: s(3800),
+        scrub: 0.8,
+      }
+    }
+  );
+
   // --- SCENE 4 PARALLAX: CITADEL ARCHITECTURE (Y: 3100 - 5200) ---
   // 1. Building Cluster Mixed comes from left side before reaching 3787px and places on screen
   gsap.fromTo('#building-cluster-mixed',
@@ -292,55 +370,6 @@ document.addEventListener('DOMContentLoaded', () => {
         trigger: mainTrigger,
         start: s(4200),
         end: s(5800),
-        scrub: true,
-      }
-    }
-  );
-
-  // --- SCENE 5 PARALLAX: MINARET & BASE ROAD (REPOSITIONED AT Y: 4800 - 6600) ---
-  gsap.fromTo('#minaret-tower',
-    { y: 160, opacity: 0.2, scale: 0.96 },
-    {
-      y: -220,
-      opacity: 1.0,
-      scale: 1.05,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: mainTrigger,
-        start: s(4200),
-        end: s(6600),
-        scrub: true,
-      }
-    }
-  );
-
-  gsap.fromTo('#city-cluster-european',
-    { x: 180, opacity: 0.2 },
-    {
-      x: 0,
-      opacity: 1.0,
-      y: -160,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: mainTrigger,
-        start: s(4300),
-        end: s(6600),
-        scrub: true,
-      }
-    }
-  );
-
-  gsap.fromTo('#horse-cart',
-    { x: 120, opacity: 0.3 },
-    {
-      x: -160,
-      y: -180,
-      opacity: 1.0,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: mainTrigger,
-        start: s(5000),
-        end: s(6600),
         scrub: true,
       }
     }
@@ -439,25 +468,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ScrollTrigger.create({
       trigger: mainTrigger,
-      start: s(4600),
-      end: s(6150),
+      start: s(5000),
+      end: s(6200),
       scrub: true,
       onUpdate: (self) => {
         s5TargetProgress = self.progress;
-
-        // Sticky Screen Lock at 5445px when scrolled into viewport view
-        const currentScrollY = window.scrollY || window.pageYOffset || 0;
-        if (currentScrollY >= 5445 && currentScrollY <= 6650) {
-          const pinOffset = currentScrollY - 5445;
-          s5Canvas.style.transform = `translateY(${pinOffset}px)`;
-        } else if (currentScrollY < 5445) {
-          s5Canvas.style.transform = `translateY(0px)`;
-        }
       }
     });
 
     function s5Loop() {
-      s5LerpProgress += (s5TargetProgress - s5LerpProgress) * 0.14;
+      s5LerpProgress += (s5TargetProgress - s5LerpProgress) * 0.08;
+
+      // Exact Zero-Lag Viewport Pinning (Stays 100% stationary without any lerp lag or double-transform bugs!)
+      const currentScrollY = lenis ? lenis.actualScroll : (window.scrollY || 0);
+      const scaledPinStart = 5000 * currentScale;
+      const scaledPinEnd = 6200 * currentScale;
+
+      let targetPinY = 0;
+      if (currentScrollY >= scaledPinStart && currentScrollY <= scaledPinEnd) {
+        targetPinY = (currentScrollY - scaledPinStart) / currentScale;
+      } else if (currentScrollY > scaledPinEnd) {
+        targetPinY = (scaledPinEnd - scaledPinStart) / currentScale;
+      }
+
+      s5Canvas.style.position = 'absolute';
+      s5Canvas.style.top = '5000px';
+      s5Canvas.style.left = '0px';
+      s5Canvas.style.transform = `translateY(${targetPinY}px)`;
+
       checkAndDrawS5();
       requestAnimationFrame(s5Loop);
     }
@@ -1091,5 +1129,51 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   }
+
+  // ==========================================================================
+  // 7. ABSOLUTE BOTTOM TERMINAL: PARALLAX STRETCH ARROW & TEXT HANDLERS
+  // ==========================================================================
+  const endArrowWrap = document.getElementById('end-arrow-wrap');
+  const endScrollText = document.getElementById('end-scroll-text');
+
+  const scrollToTop = () => {
+    lenis.scrollTo(0, { immediate: false, duration: 2.2 });
+  };
+
+  if (endArrowWrap) endArrowWrap.addEventListener('click', scrollToTop);
+  if (endScrollText) endScrollText.addEventListener('click', scrollToTop);
+
+  // Parallax Vertical Stretch & Float for Upward Arrow
+  gsap.fromTo('#end-arrow-svg',
+    { scaleY: 0.6, y: 60, opacity: 0.2 },
+    {
+      scaleY: 1.5,
+      y: -30,
+      opacity: 1.0,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: mainTrigger,
+        start: s(5600),
+        end: s(6600),
+        scrub: 0.8,
+      }
+    }
+  );
+
+  // Terminal Section Parallax Entrance
+  gsap.fromTo('#terminal-end-section',
+    { opacity: 0, y: 80 },
+    {
+      opacity: 1,
+      y: -20,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: mainTrigger,
+        start: s(5600),
+        end: s(6600),
+        scrub: 0.8,
+      }
+    }
+  );
 
 });

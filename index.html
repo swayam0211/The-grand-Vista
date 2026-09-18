@@ -27,7 +27,7 @@
   <!-- Fixed Museum HUD / Navigation Overlay -->
   <header class="museum-hud">
     <div class="hud-brand">
-      <span class="hud-tag">EXHIBITION</span>
+      <span class="hud-tag" id="hud-scene-tag">EXHIBITION • SCENE I</span>
       <h1 class="hud-title">THE GRAND VISTA</h1>
     </div>
 
@@ -142,7 +142,12 @@
 
       <!-- Lower Valley City Panorama -->
       <img src="images from figma/city-panorama-lower.png" id="city-panorama-lower" class="p-layer bg-depth-layer"
-        style="left:-187px; top:2515px; width:1663px; height:737px;" alt="Lower City Panorama">
+        style="left:-187px; top:2515px; width:1763px; height:737px;" alt="Lower City Panorama">
+
+      <!-- Vignette Atmospheric Frame Overlay for Train & Bridge Pillars Area -->
+      <img src="images from figma/city-panorama-lower.png" id="bridge-vignette-overlay" class="p-layer sky-layer"
+        style="left:-50px; top:2915px; width:1640px; height:950px; pointer-events:none; z-index:75; opacity:1;"
+        alt="Bridge Pillars Vignette Overlay">
 
       <!-- ================= SCENE 4: CITADEL ARCHITECTURE (Y: 4200 - 6300) ================= -->
       <!-- Sprawling Citadel Buildings -->
@@ -157,79 +162,27 @@
       <canvas id="geometry-canvas" class="p-layer video-canvas"
         style="left:0px; top:3300px; width:1440px; height:3300px; pointer-events:none; z-index:12;"></canvas>
 
-      <!-- ================= SCENE 5: SKETCH & WATER-DROP FLUID COLOR REVEAL (Y: 5445) ================= -->
+      <!-- ================= SCENE 5: SKETCH & WATER-DROP FLUID COLOR REVEAL (Y: 5000) ================= -->
       <canvas id="section-5-canvas" class="p-layer mid-layer" width="1440" height="900"
         style="left:0px; top:5000px; width:1440px; height:900px; pointer-events:none; z-index:15;"></canvas>
 
+      <!-- ================= ABSOLUTE BOTTOM TERMINAL: PARALLAX STRETCH ARROW & TEXT (Y: 6250) ================= -->
+      <div id="terminal-end-section" class="p-layer" style="left:0px; top:6250px; width:1440px; height:450px; z-index:100; pointer-events:auto; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        
+        <!-- Parallax Stretching Upward Arrow -->
+        <div id="end-arrow-wrap" class="end-arrow-container" style="cursor:pointer;" title="Scroll Up to Top">
+          <svg id="end-arrow-svg" width="48" height="72" viewBox="0 0 24 36" fill="none" stroke="#d4af37" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="32" x2="12" y2="4"></line>
+            <polyline points="4 12 12 4 20 12"></polyline>
+          </svg>
+        </div>
+
+        <!-- Simple Containerless Typography -->
+        <span class="end-simple-tag">EXHIBITION TERMINAL • END OF THE JOURNEY</span>
+        <h2 id="end-scroll-text" class="end-simple-title" style="cursor:pointer;" title="Click to Scroll Up">SCROLL UP TO REPLAY</h2>
+      </div>
+
     </main>
-  </div>
-
-  <!-- ==========================================================================
-       VISUAL PARALLAX EDITOR PANEL (Hidden by Default)
-       ========================================================================== -->
-  <div id="parallax-editor" class="editor-panel hidden"
-    style="resize: both; overflow: auto; min-width: 380px; min-height: 400px; padding-bottom: 30px;">
-    <div class="editor-header" id="editor-drag-handle" style="cursor: grab; user-select: none;">
-      <h3 style="pointer-events: none;">Visual Editor</h3>
-      <button id="close-editor-btn" class="icon-btn" style="cursor: pointer;">&times;</button>
-    </div>
-
-    <div class="editor-body">
-      <div class="editor-group" style="margin-bottom: 20px;">
-        <label>Selected Layer</label>
-        <select id="editor-target-dropdown"
-          style="width: 100%; padding: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid var(--gold-primary); border-radius: 4px; outline: none; font-size: 0.8rem;">
-          <option value="">-- Click an image or select here --</option>
-        </select>
-      </div>
-
-      <div class="editor-group">
-        <label>Y Offset (Parallax)</label>
-        <div class="editor-row">
-          <input type="range" id="edit-y" min="-5000" max="5000" value="0">
-          <input type="number" id="edit-y-val" value="0">
-        </div>
-      </div>
-
-      <div class="editor-group">
-        <label>X Offset (Horizontal)</label>
-        <div class="editor-row">
-          <input type="range" id="edit-x" min="-5000" max="5000" value="0">
-          <input type="number" id="edit-x-val" value="0">
-        </div>
-      </div>
-
-      <div class="editor-group">
-        <label>Opacity (Start -> End)</label>
-        <div class="editor-row">
-          <input type="number" id="edit-opacity-start" min="0" max="1" step="0.1" value="1" placeholder="Start">
-          <span>-></span>
-          <input type="number" id="edit-opacity-end" min="0" max="1" step="0.1" value="1" placeholder="End">
-        </div>
-      </div>
-
-      <div class="editor-group">
-        <label>Scroll Trigger (Start -> End Y)</label>
-        <div class="editor-row">
-          <input type="number" id="edit-scroll-start" value="0" placeholder="Start px">
-          <span>-></span>
-          <input type="number" id="edit-scroll-end" value="1000" placeholder="End px">
-        </div>
-      </div>
-
-      <div class="editor-group">
-        <label>Animation Smoothness (Scrub Time)</label>
-        <div class="editor-row">
-          <input type="range" id="edit-scrub" min="0" max="5" step="0.1" value="0">
-          <input type="number" id="edit-scrub-val" value="0">
-          <span style="font-size: 0.7rem; color: #a1a1a6;">(0 = Instant)</span>
-        </div>
-      </div>
-
-      <div class="editor-actions">
-        <button id="editor-export-btn" class="hud-btn primary" style="width: 100%;">Copy Final Config</button>
-      </div>
-    </div>
   </div>
 
   <!-- External JS Dependencies -->
@@ -239,7 +192,6 @@
 
   <!-- Main Application Script -->
   <script src="app.js"></script>
-  <script src="editor.js"></script>
 
   <!-- Live Auto-Reload Script -->
   <script>
