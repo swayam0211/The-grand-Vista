@@ -96,13 +96,21 @@ document.addEventListener('DOMContentLoaded', () => {
     );
   });
 
-  // Replay Intro Button scrolls smooth back to top (where clouds cover section)
-  const replayBtn = document.getElementById('replay-curtain-btn');
-  if (replayBtn) {
-    replayBtn.addEventListener('click', () => {
-      lenis.scrollTo(0, { immediate: false, duration: 1.5 });
-    });
-  }
+  // Big App Hero Title ("THE GRAND VISTA") fades from 100% to 0% opacity as clouds part (0 to 600px)
+  gsap.fromTo('#hero-grand-title',
+    { opacity: 1.0, y: 0 },
+    {
+      opacity: 0,
+      y: -80,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: mainTrigger,
+        start: 'top top',
+        end: s(600),
+        scrub: 1.0,
+      }
+    }
+  );
 
   // ==========================================================================
   // 4. SECTION WAYPOINT MAGNET SNAPPING & DEPTH INDICATOR
@@ -274,6 +282,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   );
 
+  // Scene II Containerless Typography Float Reveal
+  gsap.fromTo('#scene-2-text-block',
+    { y: 80, opacity: 0 },
+    {
+      y: -30,
+      opacity: 1.0,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: mainTrigger,
+        start: s(1200),
+        end: s(2200),
+        scrub: 1.0,
+      }
+    }
+  );
+
   gsap.to('#birds-flock-static', {
     x: 220,
     y: -120,
@@ -366,12 +390,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   );
 
-  // 4. Dark Atmosphere Transition Band (100% solid opacity hiding background seam at 5548px)
+  // 4. Dark Atmosphere Transition Band (Statically covers background seam at 5548px with 100% solid opacity)
   gsap.fromTo('#atmosphere-band',
-    { opacity: 1.0, y: 30 },
+    { opacity: 1.0, y: 0 },
     {
       opacity: 1.0,
-      y: -30,
+      y: 0,
       ease: 'none',
       scrollTrigger: {
         trigger: mainTrigger,
@@ -387,8 +411,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (s5Canvas) {
     const ctx5 = s5Canvas.getContext('2d');
-    const cw = 1440;
-    const ch = 900;
+    const cw = 1480;
+    const ch = 925;
     s5Canvas.width = cw;
     s5Canvas.height = ch;
 
@@ -500,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       s5Canvas.style.position = 'absolute';
       s5Canvas.style.top = '5000px';
-      s5Canvas.style.left = '0px';
+      s5Canvas.style.left = '-23px';
       s5Canvas.style.transform = `translateY(${targetPinY}px)`;
 
       checkAndDrawS5();

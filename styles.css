@@ -146,91 +146,24 @@ body {
 }
 
 /* ==========================================================================
-   MUSEUM HUD & OVERLAY INTERFACE
+   CORNER DEPTH INDICATOR (BOTTOM-RIGHT)
    ========================================================================== */
-.museum-hud {
+.corner-depth {
   position: fixed;
-  top: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(1360px, 94vw);
+  right: 32px;
+  bottom: 28px;
   z-index: 1000;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 28px;
-  background: var(--hud-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--hud-border);
-  border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-}
-
-.hud-brand {
-  display: flex;
-  flex-direction: column;
-}
-
-.hud-tag {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.25em;
-  color: var(--gold-primary);
-  text-transform: uppercase;
-}
-
-.hud-title {
-  font-family: 'Cinzel', serif;
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--gold-accent);
-  margin-top: 2px;
-  background: linear-gradient(135deg, #ffffff 0%, var(--gold-accent) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.hud-controls {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.hud-btn {
-  display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   gap: 8px;
-  padding: 10px 18px;
-  background: rgba(212, 175, 55, 0.08);
+  padding: 8px 18px;
+  background: var(--hud-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--hud-border);
   border-radius: 30px;
-  color: var(--gold-accent);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.hud-btn:hover {
-  background: rgba(212, 175, 55, 0.25);
-  border-color: var(--gold-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.2);
-}
-
-.hud-depth-indicator {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  padding-left: 16px;
-  border-left: 1px solid var(--hud-border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  pointer-events: none;
 }
 
 .depth-label {

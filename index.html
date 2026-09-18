@@ -24,27 +24,11 @@
 
 <body>
 
-  <!-- Fixed Museum HUD / Navigation Overlay -->
-  <header class="museum-hud">
-    <div class="hud-brand">
-      <span class="hud-tag" id="hud-scene-tag">EXHIBITION • SCENE I</span>
-      <h1 class="hud-title">THE GRAND VISTA</h1>
-    </div>
-
-    <div class="hud-controls">
-      <button id="replay-curtain-btn" class="hud-btn" title="Replay Cloud Opening">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-        </svg>
-        <span>REPLAY INTRO</span>
-      </button>
-
-      <div class="hud-depth-indicator">
-        <span class="depth-label">DEPTH</span>
-        <span id="scroll-percent">0%</span>
-      </div>
-    </div>
-  </header>
+  <!-- Fixed Bottom-Right Depth Indicator (Exact Fonts & Colors Maintained) -->
+  <div id="corner-depth-indicator" class="corner-depth">
+    <span class="depth-label">DEPTH</span>
+    <span id="scroll-percent">0%</span>
+  </div>
 
   <!-- Side Parallax Scene Indicator -->
   <nav class="scene-nav" aria-label="Scene Navigation">
@@ -70,20 +54,35 @@
         style="left:-77px; top:5548px; width:1595px; height:5548px;" alt="Sky Background Bottom">
 
       <!-- Dark Atmosphere Transition Band (Blends top & bottom background seam at 5548px) -->
-      <img src="images from figma/rectangle-1.png" id="atmosphere-band" class="p-layer mid-layer"
-        style="left:-1000px; top:5120px; width:8440px; height:860px; z-index:3; opacity:1;" alt="Atmospheric Layer">
+      <img src="images from figma/rectangle 1.png" id="atmosphere-band" class="p-layer mid-layer"
+        style="left:-577px; top:5180px; width:2595px; height:836px; z-index:3; opacity:1;" alt="Atmospheric Layer">
 
       <!-- ================= SCENE 1: CANOPY & FLOATING CLOUDS (Y: 0 - 1400) ================= -->
-      <!-- Giant Top Tree Canopy Attachment -->
-      <img src="images from figma/trees-top-section.png" id="tree-top-canopy" class="p-layer canopy-layer"
-        style="left:0px; top:0px; width:1440px; height:554px;" alt="Tree Canopy Top">
+      <!-- Big App Hero Title: THE GRAND VISTA (Fades from 100% to 0% opacity with clouds) -->
+      <div id="hero-grand-title" class="p-layer"
+        style="left:0px; top:380px; width:1440px; z-index:120; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none;">
+        <span
+          style="font-family:'Inter', sans-serif; font-size:0.85rem; font-weight:700; letter-spacing:0.35em; color:#452a04; text-transform:uppercase; margin-bottom:12px; text-shadow:0 2px 10px rgba(0,0,0,0.8);">
+          EXHIBITION • PARALLAX CANVAS
+        </span>
+        <h1
+          style="font-family:'Cinzel', serif; font-size:4.2rem; font-weight:700; letter-spacing:0.18em; color:#3c2501; text-align:center; text-shadow:0 4px 30px rgba(0,0,0,0.9), 0 0 40px rgba(212,175,55,0.4); text-transform:uppercase;">
+          THE GRAND VISTA
+        </h1>
+      </div>
 
+      <!-- ================= SCENE 1: CANOPY & FLOATING CLOUDS (Y: 0 - 1400) ================= -->
       <!-- Foreground Left Bare Tree -->
       <img src="images from figma/giant_tree.png" id="tree-bare-left" class="p-layer fg-layer"
         style="left:-53px; top:2px; width:1323px; height:2596px;" alt="Bare Tree Left">
 
+      <!-- Giant Top Tree Canopy Attachment -->
+      <img src="images from figma/top_tree.png" id="tree-top-canopy" class="p-layer canopy-layer"
+        style="left:-20px; top:0px; width:1460px; height:554px;" alt="Tree Canopy Top">
+
+
       <!-- Right Giant Tree Overlay -->
-      <img src="images from figma/trees-giant-overlay.png" id="trees-giant-overlay" class="p-layer fg-layer"
+      <img src="images from figma/tree_left_side.png" id="trees-giant-overlay" class="p-layer fg-layer"
         style="left:660px; top:0px; width:919px; height:1578px;" alt="Giant Tree Overlay Right">
 
       <!-- Floating Sky Cloud Cutouts (Layered Depth) -->
@@ -125,6 +124,24 @@
       <img src="images from figma/city-right-intro.png" id="city-right-intro" class="p-layer mid-layer"
         style="left:354px; top:1596px; width:1225px; height:1204px;" alt="City Intro Right">
 
+      <!-- Scene II Containerless Dark Brown Typography -->
+      <div id="scene-2-text-block" class="p-layer"
+        style="left:60px; top:2020px; width:520px; pointer-events:none; z-index:50; display:flex; flex-direction:column; gap:16px;">
+        <span
+          style="font-family:'Inter', sans-serif; font-size:0.75rem; font-weight:700; letter-spacing:0.28em; color:#412c06; text-transform:uppercase;">
+          SCENE II • SILHOUETTES & HORIZON
+        </span>
+        <h2
+          style="font-family:'Cinzel', serif; font-size:2.2rem; font-weight:700; letter-spacing:0.08em; color:#412c06; line-height:1.25; text-shadow:0 2px 12px rgba(65, 44, 6, 0.18);">
+          EUROPEAN SKYLINE & SILHOUETTE TRAILS
+        </h2>
+        <p
+          style="font-family:'Inter', sans-serif; font-size:0.95rem; font-weight:500; line-height:1.7; color:#503104; opacity:0.92; max-width:460px;">
+          As the morning mist disperses over the hillside, the distant spires and classic facades of the city emerge
+          against the soft canvas sky—guided by silhouetted figures overlooking the vast horizon.
+        </p>
+      </div>
+
       <!-- Birds Flock Static Image -->
       <img src="images from figma/birds-flock-sky.png" id="birds-flock-static" class="p-layer sky-layer"
         style="left:-7px; top:2440px; width:667px; height:667px;" alt="Birds Flock Sky">
@@ -141,12 +158,12 @@
         style="left:-25px; top:2817px; width:1455px; height:651px; pointer-events:none;"></canvas>
 
       <!-- Lower Valley City Panorama -->
-      <img src="images from figma/city-panorama-lower.png" id="city-panorama-lower" class="p-layer bg-depth-layer"
-        style="left:-187px; top:2515px; width:1763px; height:737px;" alt="Lower City Panorama">
+      <img src="images from figma/mountain.png" id="city-panorama-lower" class="p-layer bg-depth-layer"
+        style="left:-30px; top:2515px; width:1763px; height:737px;" alt="Lower City Panorama">
 
       <!-- Vignette Atmospheric Frame Overlay for Train & Bridge Pillars Area -->
-      <img src="images from figma/city-panorama-lower.png" id="bridge-vignette-overlay" class="p-layer sky-layer"
-        style="left:-110px; top:3315px; width:1690px; height:650px; pointer-events:none; z-index:95; opacity:1; transform: rotate(180deg);"
+      <img src="images from figma/Object.png" id="bridge-vignette-overlay" class="p-layer sky-layer"
+        style="left:-130px; top:3315px; width:1690px; height:650px; pointer-events:none; z-index:95; opacity:1; transform: rotate(180deg);"
         alt="Bridge Pillars Vignette Overlay">
 
       <!-- ================= SCENE 4: CITADEL ARCHITECTURE (Y: 4200 - 6300) ================= -->
@@ -181,8 +198,8 @@
         style="left:0px; top:3300px; width:1440px; height:3300px; pointer-events:none; z-index:12;"></canvas>
 
       <!-- ================= SCENE 5: SKETCH & WATER-DROP FLUID COLOR REVEAL (Y: 5000) ================= -->
-      <canvas id="section-5-canvas" class="p-layer mid-layer" width="1440" height="900"
-        style="left:0px; top:5000px; width:1440px; height:900px; pointer-events:none; z-index:15;"></canvas>
+      <canvas id="section-5-canvas" class="p-layer mid-layer" width="1480" height="925"
+        style="left:-20px; top:5000px; width:1480px; height:925px; pointer-events:none; z-index:15;"></canvas>
 
       <!-- ================= ABSOLUTE BOTTOM TERMINAL: PARALLAX STRETCH ARROW & TEXT (Y: 6650) ================= -->
       <div id="terminal-end-section" class="p-layer"
