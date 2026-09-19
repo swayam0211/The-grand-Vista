@@ -1188,56 +1188,164 @@ document.addEventListener('DOMContentLoaded', () => {
   // 6. INTERACTIVE CANVASES: BIRDS FLOCK & SCROLL-CONTROLLED TRAIN
   // ==========================================================================
   // ------------------------------------------------------------------------
-  // HIGHLY DETAILED ANATOMICAL VECTOR BIRD SILHOUETTE RENDERER
+  // 4 DISTINCT AVIAN SPECIES SILHOUETTE RENDERERS
   // ------------------------------------------------------------------------
-  function drawDetailedBird(ctx, x, y, size, wingAngle, flightAngle, color = '#2b1b05', opacity = 0.85) {
+
+  // Species 0: Soaring Eagle / Falcon (Broad Fingered Wingtips & Fan Tail)
+  function drawEagle(ctx, size, wingAngle, wFold) {
+    const wY = Math.sin(wingAngle) * (size * 0.85);
+    ctx.beginPath();
+    ctx.moveTo(size * 1.4, -size * 0.05); // Sharp beak
+    ctx.quadraticCurveTo(size * 1.0, -size * 0.25, size * 0.6, -size * 0.15);
+
+    // Right Wing
+    const rTipX = -size * 0.4 + wFold;
+    const rTipY = -wY * 1.15 - size * 0.4;
+    ctx.quadraticCurveTo(size * 0.35 + wFold * 0.3, -wY * 0.85 - size * 0.2, rTipX, rTipY);
+    ctx.lineTo(rTipX + size * 0.18, rTipY + size * 0.18);
+    ctx.lineTo(rTipX + size * 0.12, rTipY + size * 0.32);
+    ctx.lineTo(rTipX + size * 0.06, rTipY + size * 0.46);
+    ctx.quadraticCurveTo(size * 0.05, -size * 0.05, -size * 0.3, 0);
+
+    // Wide Fan Tail
+    ctx.lineTo(-size * 1.3, size * 0.02);
+    ctx.lineTo(-size * 1.6, size * 0.3);
+    ctx.lineTo(-size * 1.3, size * 0.35);
+
+    // Left Wing
+    const lTipX = -size * 0.4 + wFold;
+    const lTipY = wY * 1.15 + size * 0.4;
+    ctx.quadraticCurveTo(size * 0.35 + wFold * 0.3, wY * 0.85 + size * 0.2, lTipX, lTipY);
+    ctx.lineTo(lTipX + size * 0.18, lTipY - size * 0.18);
+    ctx.lineTo(lTipX + size * 0.12, lTipY - size * 0.32);
+    ctx.lineTo(lTipX + size * 0.06, lTipY - size * 0.46);
+    ctx.quadraticCurveTo(size * 0.1, size * 0.05, size * 0.5, size * 0.15);
+
+    ctx.quadraticCurveTo(size * 0.9, size * 0.08, size * 1.4, -size * 0.05);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Species 1: High-Speed Swallow (Swept-Back Scimitar Wings & Deeply Forked V-Tail)
+  function drawSwallow(ctx, size, wingAngle, wFold) {
+    const wY = Math.sin(wingAngle) * (size * 0.95);
+    ctx.beginPath();
+    ctx.moveTo(size * 1.2, 0); // Sleek beak
+    ctx.quadraticCurveTo(size * 0.8, -size * 0.18, size * 0.4, -size * 0.1);
+
+    // Right Wing (Crescent tip)
+    const rTipX = -size * 0.7 + wFold * 1.2;
+    const rTipY = -wY * 1.25 - size * 0.3;
+    ctx.quadraticCurveTo(size * 0.2, -wY * 0.7 - size * 0.15, rTipX, rTipY);
+    ctx.quadraticCurveTo(-size * 0.2, -wY * 0.4 - size * 0.05, -size * 0.2, 0);
+
+    // DEEPLY FORKED V-TAIL
+    ctx.lineTo(-size * 1.2, size * 0.05);
+    ctx.lineTo(-size * 1.95, -size * 0.25); // Top long forked streamer
+    ctx.lineTo(-size * 1.35, size * 0.15);  // Inner V notch
+    ctx.lineTo(-size * 1.95, size * 0.55);  // Bottom long forked streamer
+    ctx.lineTo(-size * 1.2, size * 0.25);
+
+    // Left Wing (Crescent tip)
+    const lTipX = -size * 0.7 + wFold * 1.2;
+    const lTipY = wY * 1.25 + size * 0.3;
+    ctx.quadraticCurveTo(size * 0.2, wY * 0.7 + size * 0.15, lTipX, lTipY);
+    ctx.quadraticCurveTo(-size * 0.2, wY * 0.4 + size * 0.05, size * 0.4, size * 0.1);
+
+    ctx.quadraticCurveTo(size * 0.8, size * 0.08, size * 1.2, 0);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Species 2: Graceful Seagull / Albatross (Angled "M" Wings & Elbow Joint)
+  function drawSeagull(ctx, size, wingAngle, wFold) {
+    const wY = Math.sin(wingAngle) * (size * 0.8);
+    ctx.beginPath();
+    ctx.moveTo(size * 1.3, -size * 0.02);
+    ctx.quadraticCurveTo(size * 0.9, -size * 0.2, size * 0.5, -size * 0.12);
+
+    // Right Wing ("M" Elbow Joint)
+    const elbowX = size * 0.25;
+    const elbowY = -wY * 0.6 - size * 0.35;
+    const rTipX = -size * 0.5 + wFold * 0.4;
+    const rTipY = -wY * 1.0 - size * 0.1;
+
+    ctx.quadraticCurveTo(size * 0.4, -size * 0.2, elbowX, elbowY);
+    ctx.quadraticCurveTo(elbowX - size * 0.2, elbowY - size * 0.1, rTipX, rTipY);
+    ctx.quadraticCurveTo(-size * 0.1, -wY * 0.3, -size * 0.2, 0);
+
+    // Pointed Tail
+    ctx.lineTo(-size * 1.3, size * 0.08);
+    ctx.lineTo(-size * 1.45, size * 0.18);
+    ctx.lineTo(-size * 1.15, size * 0.24);
+
+    // Left Wing ("M" Elbow Joint)
+    const lElbowY = wY * 0.6 + size * 0.35;
+    const lTipX = -size * 0.5 + wFold * 0.4;
+    const lTipY = wY * 1.0 + size * 0.1;
+
+    ctx.quadraticCurveTo(-size * 0.1, wY * 0.3, lTipX, lTipY);
+    ctx.quadraticCurveTo(elbowX - size * 0.2, lElbowY + size * 0.1, elbowX, lElbowY);
+    ctx.quadraticCurveTo(size * 0.4, size * 0.2, size * 0.5, size * 0.12);
+
+    ctx.quadraticCurveTo(size * 0.9, size * 0.08, size * 1.3, -size * 0.02);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Species 3: Compact Songbird / Finch (Short Rounded Wings & Small Body)
+  function drawSongbird(ctx, size, wingAngle, wFold) {
+    const wY = Math.sin(wingAngle) * (size * 0.75);
+    ctx.beginPath();
+    ctx.moveTo(size * 1.1, 0);
+    ctx.arc(size * 0.5, -size * 0.05, size * 0.3, -Math.PI * 0.5, Math.PI * 0.2, true);
+
+    // Right Wing (Short rounded)
+    const rTipX = -size * 0.2 + wFold;
+    const rTipY = -wY * 1.1 - size * 0.3;
+    ctx.quadraticCurveTo(size * 0.3, -wY * 0.8 - size * 0.2, rTipX, rTipY);
+    ctx.quadraticCurveTo(-size * 0.1, -size * 0.1, -size * 0.2, 0);
+
+    // Short Square Tail
+    ctx.lineTo(-size * 1.1, size * 0.05);
+    ctx.lineTo(-size * 1.25, size * 0.25);
+    ctx.lineTo(-size * 1.0, size * 0.3);
+
+    // Left Wing (Short rounded)
+    const lTipX = -size * 0.2 + wFold;
+    const lTipY = wY * 1.1 + size * 0.3;
+    ctx.quadraticCurveTo(-size * 0.1, size * 0.1, lTipX, lTipY);
+    ctx.quadraticCurveTo(size * 0.3, wY * 0.8 + size * 0.2, size * 0.4, size * 0.15);
+
+    ctx.quadraticCurveTo(size * 0.8, size * 0.1, size * 1.1, 0);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawBirdBySpecies(ctx, x, y, size, wingAngle, flightAngle, color, opacity, speciesType) {
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(flightAngle);
     ctx.globalAlpha = opacity;
     ctx.fillStyle = color;
 
-    const wY = Math.sin(wingAngle) * (size * 0.85);   // Wing flap Y displacement
-    const wFold = Math.cos(wingAngle) * (size * 0.22); // Wing joint flex
+    const wFold = Math.cos(wingAngle) * (size * 0.22);
 
-    ctx.beginPath();
-
-    // 1. BEAK & HEAD CROWN
-    ctx.moveTo(size * 1.3, -size * 0.05); // Beak tip
-    ctx.quadraticCurveTo(size * 0.95, -size * 0.22, size * 0.55, -size * 0.14); // Crown
-
-    // 2. RIGHT (FAR) WING (With Feathered Wingtips)
-    const rWingX = size * 0.3 + wFold * 0.3;
-    const rWingY = -wY * 0.9 - size * 0.18;
-    const rTipX = -size * 0.35 + wFold;
-    const rTipY = -wY * 1.15 - size * 0.38;
-
-    ctx.quadraticCurveTo(rWingX, rWingY * 0.6, rTipX, rTipY); // Leading wing edge
-    ctx.lineTo(rTipX + size * 0.14, rTipY + size * 0.22);       // Primary feather tip 1
-    ctx.lineTo(rTipX + size * 0.07, rTipY + size * 0.38);       // Primary feather tip 2
-    ctx.quadraticCurveTo(size * 0.08, -size * 0.08, -size * 0.25, 0); // Trailing wing edge
-
-    // 3. TAPERED TAIL FAN FEATHERS
-    ctx.lineTo(-size * 1.35, size * 0.04);
-    ctx.lineTo(-size * 1.48, size * 0.22); // Tail fan edge
-    ctx.lineTo(-size * 1.22, size * 0.28);
-
-    // 4. LEFT (NEAR) WING (With Feathered Wingtips & Arm Joint)
-    const lWingX = size * 0.35 + wFold * 0.3;
-    const lWingY = wY * 0.9 + size * 0.18;
-    const lTipX = -size * 0.35 + wFold;
-    const lTipY = wY * 1.15 + size * 0.38;
-
-    ctx.quadraticCurveTo(lWingX, lWingY * 0.6, lTipX, lTipY); // Leading wing edge
-    ctx.lineTo(lTipX + size * 0.14, lTipY - size * 0.22);       // Primary feather tip 1
-    ctx.lineTo(lTipX + size * 0.07, lTipY - size * 0.38);       // Primary feather tip 2
-    ctx.quadraticCurveTo(size * 0.15, size * 0.08, size * 0.45, size * 0.14); // Trailing edge
-
-    // 5. CHEST & THROAT
-    ctx.quadraticCurveTo(size * 0.85, size * 0.08, size * 1.3, -size * 0.05);
-
-    ctx.closePath();
-    ctx.fill();
+    switch (speciesType) {
+      case 0:
+        drawEagle(ctx, size, wingAngle, wFold);
+        break;
+      case 1:
+        drawSwallow(ctx, size, wingAngle, wFold);
+        break;
+      case 2:
+        drawSeagull(ctx, size, wingAngle, wFold);
+        break;
+      case 3:
+      default:
+        drawSongbird(ctx, size, wingAngle, wFold);
+        break;
+    }
 
     ctx.restore();
   }
@@ -1249,18 +1357,22 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.width = 1440;
     canvas.height = 600;
 
-    const birds = Array.from({ length: 22 }, (_, idx) => ({
-      id: idx,
-      x: Math.random() * 1440,
-      y: Math.random() * 450 + 40,
-      speed: Math.random() * 2.2 + 1.2,
-      size: Math.random() * 9.5 + 6.5,
-      wingState: Math.random() * Math.PI * 2,
-      wingSpeed: Math.random() * 0.12 + 0.07,
-      yOffset: Math.random() * 100,
-      color: idx % 3 === 0 ? '#1c1103' : (idx % 3 === 1 ? '#322008' : '#482e05'),
-      opacity: Math.random() * 0.35 + 0.55
-    }));
+    const birds = Array.from({ length: 24 }, (_, idx) => {
+      const type = idx % 4; // 0 = Eagle, 1 = Swallow, 2 = Seagull, 3 = Songbird
+      return {
+        id: idx,
+        speciesType: type,
+        x: Math.random() * 1440,
+        y: Math.random() * 450 + 40,
+        speed: (type === 1 ? 2.6 : (type === 0 ? 1.4 : 2.0)) + Math.random() * 0.6,
+        size: (type === 0 ? 10.5 : (type === 3 ? 5.5 : 8.0)) + Math.random() * 2.0,
+        wingState: Math.random() * Math.PI * 2,
+        wingSpeed: (type === 1 ? 0.16 : (type === 0 ? 0.08 : 0.12)) + Math.random() * 0.03,
+        yOffset: Math.random() * 100,
+        color: idx % 3 === 0 ? '#1b1002' : (idx % 3 === 1 ? '#322008' : '#492f05'),
+        opacity: Math.random() * 0.35 + 0.55
+      };
+    });
 
     function drawBirds() {
       ctxB.clearRect(0, 0, canvas.width, canvas.height);
@@ -1276,7 +1388,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const flightAngle = Math.sin(b.wingState * 0.5) * 0.07; // Natural banking flight roll
-        drawDetailedBird(ctxB, b.x, b.y, b.size, b.wingState, flightAngle, b.color, b.opacity);
+        drawBirdBySpecies(ctxB, b.x, b.y, b.size, b.wingState, flightAngle, b.color, b.opacity, b.speciesType);
       });
 
       requestAnimationFrame(drawBirds);
