@@ -1187,6 +1187,61 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================================================
   // 6. INTERACTIVE CANVASES: BIRDS FLOCK & SCROLL-CONTROLLED TRAIN
   // ==========================================================================
+  // ------------------------------------------------------------------------
+  // HIGHLY DETAILED ANATOMICAL VECTOR BIRD SILHOUETTE RENDERER
+  // ------------------------------------------------------------------------
+  function drawDetailedBird(ctx, x, y, size, wingAngle, flightAngle, color = '#2b1b05', opacity = 0.85) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(flightAngle);
+    ctx.globalAlpha = opacity;
+    ctx.fillStyle = color;
+
+    const wY = Math.sin(wingAngle) * (size * 0.85);   // Wing flap Y displacement
+    const wFold = Math.cos(wingAngle) * (size * 0.22); // Wing joint flex
+
+    ctx.beginPath();
+
+    // 1. BEAK & HEAD CROWN
+    ctx.moveTo(size * 1.3, -size * 0.05); // Beak tip
+    ctx.quadraticCurveTo(size * 0.95, -size * 0.22, size * 0.55, -size * 0.14); // Crown
+
+    // 2. RIGHT (FAR) WING (With Feathered Wingtips)
+    const rWingX = size * 0.3 + wFold * 0.3;
+    const rWingY = -wY * 0.9 - size * 0.18;
+    const rTipX = -size * 0.35 + wFold;
+    const rTipY = -wY * 1.15 - size * 0.38;
+
+    ctx.quadraticCurveTo(rWingX, rWingY * 0.6, rTipX, rTipY); // Leading wing edge
+    ctx.lineTo(rTipX + size * 0.14, rTipY + size * 0.22);       // Primary feather tip 1
+    ctx.lineTo(rTipX + size * 0.07, rTipY + size * 0.38);       // Primary feather tip 2
+    ctx.quadraticCurveTo(size * 0.08, -size * 0.08, -size * 0.25, 0); // Trailing wing edge
+
+    // 3. TAPERED TAIL FAN FEATHERS
+    ctx.lineTo(-size * 1.35, size * 0.04);
+    ctx.lineTo(-size * 1.48, size * 0.22); // Tail fan edge
+    ctx.lineTo(-size * 1.22, size * 0.28);
+
+    // 4. LEFT (NEAR) WING (With Feathered Wingtips & Arm Joint)
+    const lWingX = size * 0.35 + wFold * 0.3;
+    const lWingY = wY * 0.9 + size * 0.18;
+    const lTipX = -size * 0.35 + wFold;
+    const lTipY = wY * 1.15 + size * 0.38;
+
+    ctx.quadraticCurveTo(lWingX, lWingY * 0.6, lTipX, lTipY); // Leading wing edge
+    ctx.lineTo(lTipX + size * 0.14, lTipY - size * 0.22);       // Primary feather tip 1
+    ctx.lineTo(lTipX + size * 0.07, lTipY - size * 0.38);       // Primary feather tip 2
+    ctx.quadraticCurveTo(size * 0.15, size * 0.08, size * 0.45, size * 0.14); // Trailing edge
+
+    // 5. CHEST & THROAT
+    ctx.quadraticCurveTo(size * 0.85, size * 0.08, size * 1.3, -size * 0.05);
+
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+  }
+
   function setupBirdsCanvas(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
@@ -1194,32 +1249,34 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.width = 1440;
     canvas.height = 600;
 
-    const birds = Array.from({ length: 14 }, () => ({
+    const birds = Array.from({ length: 22 }, (_, idx) => ({
+      id: idx,
       x: Math.random() * 1440,
-      y: Math.random() * 400 + 50,
-      speed: Math.random() * 2.2 + 1.5,
-      size: Math.random() * 8 + 6,
+      y: Math.random() * 450 + 40,
+      speed: Math.random() * 2.2 + 1.2,
+      size: Math.random() * 9.5 + 6.5,
       wingState: Math.random() * Math.PI * 2,
+      wingSpeed: Math.random() * 0.12 + 0.07,
+      yOffset: Math.random() * 100,
+      color: idx % 3 === 0 ? '#1c1103' : (idx % 3 === 1 ? '#322008' : '#482e05'),
+      opacity: Math.random() * 0.35 + 0.55
     }));
 
     function drawBirds() {
       ctxB.clearRect(0, 0, canvas.width, canvas.height);
-      ctxB.fillStyle = 'rgba(25, 20, 15, 0.75)';
 
       birds.forEach(b => {
         b.x += b.speed;
-        b.wingState += 0.15;
-        if (b.x > 1460) b.x = -40;
+        b.wingState += b.wingSpeed;
+        b.y += Math.sin(b.x * 0.008 + b.yOffset) * 0.32; // Undulating flight path
 
-        const wingY = Math.sin(b.wingState) * (b.size * 0.6);
+        if (b.x > 1480) {
+          b.x = -50;
+          b.y = Math.random() * 450 + 40;
+        }
 
-        ctxB.beginPath();
-        ctxB.moveTo(b.x, b.y);
-        ctxB.quadraticCurveTo(b.x - b.size, b.y - wingY, b.x - b.size * 1.5, b.y + wingY * 0.5);
-        ctxB.quadraticCurveTo(b.x - b.size * 0.5, b.y, b.x, b.y);
-        ctxB.quadraticCurveTo(b.x + b.size * 0.5, b.y, b.x + b.size * 1.5, b.y + wingY * 0.5);
-        ctxB.quadraticCurveTo(b.x + b.size, b.y - wingY, b.x, b.y);
-        ctxB.fill();
+        const flightAngle = Math.sin(b.wingState * 0.5) * 0.07; // Natural banking flight roll
+        drawDetailedBird(ctxB, b.x, b.y, b.size, b.wingState, flightAngle, b.color, b.opacity);
       });
 
       requestAnimationFrame(drawBirds);
