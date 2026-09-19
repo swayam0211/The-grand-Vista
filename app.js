@@ -762,7 +762,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pathNodes = [
       { x: 720, y: 150 },
       { x: 1330, y: 1100 },
-      { x: 380, y: 1850 },
+      { x: 180, y: 1850 },
       { x: 1140, y: 2600 },
       { x: 720, y: 3200 }
     ];
@@ -1172,7 +1172,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Blueprint 2: Scene 4 Citadel Architecture Center (X: 380, Y: 1850)
         if (pathProgress > 0.22) {
-          drawGoldenRatioFibonacciBlueprint(ctxG, 380, 1850, (pathProgress - 0.22) / 0.78, -scrollMotion * 0.8, 0.75);
+          drawGoldenRatioFibonacciBlueprint(ctxG, 180, 1850, (pathProgress - 0.22) / 0.78, -scrollMotion * 0.8, 0.75);
         }
 
         // Blueprint 3: Scene 5 Sanctuary / Sky Center (X: 1040, Y: 2600)
