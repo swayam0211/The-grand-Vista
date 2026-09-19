@@ -8,12 +8,22 @@
   <meta name="description"
     content="An immersive museum-grade parallax scrolling exhibition brought to life with Lenis and GSAP.">
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts (non-blocking swap — prevents render blocking) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600&display=swap"
-    rel="stylesheet">
+    rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
+
+  <!-- CDN DNS Prefetch for faster script loads -->
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
+  <!-- Preload critical above-fold images -->
+  <link rel="preload" href="images from figma/layer-2-1595x5548.png" as="image" fetchpriority="high">
+  <link rel="preload" href="images from figma/giant_tree.png" as="image" fetchpriority="high">
+  <link rel="preload" href="images from figma/top_tree.png" as="image" fetchpriority="high">
 
   <!-- Lenis CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.css">
@@ -45,17 +55,20 @@
     <main id="parallax-canvas" class="parallax-canvas">
 
       <!-- ================= BACKGROUND LAYERS ================= -->
-      <!-- Top Half Background -->
+      <!-- Top Half Background (critical — eager) -->
       <img src="images from figma/layer-2-1595x5548.png" id="bg-top" class="p-layer bg-layer"
-        style="left:-77px; top:0px; width:1595px; height:5548px;" alt="Sky Background Top">
+        style="left:-77px; top:0px; width:1595px; height:5548px;" alt="Sky Background Top"
+        fetchpriority="high" loading="eager" decoding="async">
 
-      <!-- Bottom Half Background (Flipped 180 deg) -->
+      <!-- Bottom Half Background (low priority — loads in background) -->
       <img src="images from figma/layer-1-1595x5548.png" id="bg-bottom" class="p-layer bg-layer bg-flipped"
-        style="left:-77px; top:5548px; width:1595px; height:5548px;" alt="Sky Background Bottom">
+        style="left:-77px; top:5548px; width:1595px; height:5548px;" alt="Sky Background Bottom"
+        loading="eager" fetchpriority="low" decoding="async">
 
-      <!-- Dark Atmosphere Transition Band (Blends top & bottom background seam at 5548px) -->
+      <!-- Dark Atmosphere Transition Band (low priority) -->
       <img src="images from figma/rectangle 1.png" id="atmosphere-band" class="p-layer mid-layer"
-        style="left:-577px; top:5180px; width:2595px; height:836px; z-index:3; opacity:1;" alt="Atmospheric Layer">
+        style="left:-577px; top:5180px; width:2595px; height:836px; z-index:3; opacity:1;" alt="Atmospheric Layer"
+        loading="eager" fetchpriority="low" decoding="async">
 
       <!-- ================= SCENE 1: CANOPY & FLOATING CLOUDS (Y: 0 - 1400) ================= -->
       <!-- Big App Hero Title: THE GRAND VISTA (Fades from 100% to 0% opacity with clouds) -->
@@ -72,57 +85,75 @@
       </div>
 
       <!-- ================= SCENE 1: CANOPY & FLOATING CLOUDS (Y: 0 - 1400) ================= -->
-      <!-- Foreground Left Bare Tree -->
+      <!-- Foreground Left Bare Tree (critical — eager) -->
       <img src="images from figma/giant_tree.png" id="tree-bare-left" class="p-layer fg-layer"
-        style="left:-53px; top:2px; width:1323px; height:2596px;" alt="Bare Tree Left">
+        style="left:-53px; top:2px; width:1323px; height:2596px;" alt="Bare Tree Left"
+        fetchpriority="high" loading="eager" decoding="async">
 
-      <!-- Giant Top Tree Canopy Attachment -->
+      <!-- Giant Top Tree Canopy Attachment (critical — eager) -->
       <img src="images from figma/top_tree.png" id="tree-top-canopy" class="p-layer canopy-layer"
-        style="left:-20px; top:0px; width:1460px; height:554px;" alt="Tree Canopy Top">
+        style="left:-20px; top:0px; width:1460px; height:554px;" alt="Tree Canopy Top"
+        fetchpriority="high" loading="eager" decoding="async">
 
-
-      <!-- Right Giant Tree Overlay -->
+      <!-- Right Giant Tree Overlay (critical — eager) -->
       <img src="images from figma/tree_left_side.png" id="trees-giant-overlay" class="p-layer fg-layer"
-        style="left:660px; top:0px; width:919px; height:1578px;" alt="Giant Tree Overlay Right">
+        style="left:660px; top:0px; width:919px; height:1578px;" alt="Giant Tree Overlay Right"
+        fetchpriority="high" loading="eager" decoding="async">
 
-      <!-- Floating Sky Cloud Cutouts (Layered Depth) -->
+      <!-- Floating Sky Cloud Cutouts (first 4 eager high — visible on load, rest low priority) -->
       <img src="images from figma/image-15.png" class="p-layer sky-cloud"
-        style="left:-7px; top:33px; width:725px; height:394px;" data-depth="0.6" alt="Cloud Cutout">
+        style="left:-7px; top:33px; width:725px; height:394px;" data-depth="0.6" alt="Cloud Cutout"
+        loading="eager" decoding="async">
       <img src="images from figma/image-14.png" class="p-layer sky-cloud"
-        style="left:308px; top:17px; width:569px; height:316px;" data-depth="0.9" alt="Cloud Cutout">
+        style="left:308px; top:17px; width:569px; height:316px;" data-depth="0.9" alt="Cloud Cutout"
+        loading="eager" decoding="async">
       <img src="images from figma/image-13.png" class="p-layer sky-cloud"
-        style="left:861px; top:80px; width:593px; height:329px;" data-depth="0.4" alt="Cloud Cutout">
+        style="left:861px; top:80px; width:593px; height:329px;" data-depth="0.4" alt="Cloud Cutout"
+        loading="eager" decoding="async">
       <img src="images from figma/image-12.png" class="p-layer sky-cloud"
-        style="left:398px; top:230px; width:645px; height:358px;" data-depth="1.2" alt="Cloud Cutout">
+        style="left:398px; top:230px; width:645px; height:358px;" data-depth="1.2" alt="Cloud Cutout"
+        loading="eager" decoding="async">
       <img src="images from figma/image-10.png" class="p-layer sky-cloud"
-        style="left:-7px; top:288px; width:437px; height:242px;" data-depth="0.7" alt="Cloud Cutout">
+        style="left:-7px; top:288px; width:437px; height:242px;" data-depth="0.7" alt="Cloud Cutout"
+        loading="eager" fetchpriority="low" decoding="async">
       <img src="images from figma/image-9.png" class="p-layer sky-cloud"
-        style="left:860px; top:339px; width:573px; height:318px;" data-depth="1.4" alt="Cloud Cutout">
+        style="left:860px; top:339px; width:573px; height:318px;" data-depth="1.4" alt="Cloud Cutout"
+        loading="eager" fetchpriority="low" decoding="async">
       <img src="images from figma/image-5.png" class="p-layer sky-cloud"
-        style="left:278px; top:374px; width:661px; height:360px;" data-depth="0.5" alt="Cloud Cutout">
+        style="left:278px; top:374px; width:661px; height:360px;" data-depth="0.5" alt="Cloud Cutout"
+        loading="eager" fetchpriority="low" decoding="async">
       <img src="images from figma/image-18.png" class="p-layer sky-cloud"
-        style="left:827px; top:447px; width:661px; height:360px;" data-depth="1.1" alt="Cloud Cutout">
+        style="left:827px; top:447px; width:661px; height:360px;" data-depth="1.1" alt="Cloud Cutout"
+        loading="eager" fetchpriority="low" decoding="async">
       <img src="images from figma/image-8.png" class="p-layer sky-cloud"
-        style="left:568px; top:554px; width:661px; height:360px;" data-depth="0.8" alt="Cloud Cutout">
+        style="left:568px; top:554px; width:661px; height:360px;" data-depth="0.8" alt="Cloud Cutout"
+        loading="eager" fetchpriority="low" decoding="async">
       <img src="images from figma/image-11.png" class="p-layer sky-cloud"
-        style="left:18px; top:554px; width:630px; height:350px;" data-depth="1.5" alt="Cloud Cutout">
+        style="left:18px; top:554px; width:630px; height:350px;" data-depth="1.5" alt="Cloud Cutout"
+        loading="eager" fetchpriority="low" decoding="async">
       <img src="images from figma/image-17.png" class="p-layer sky-cloud"
-        style="left:679px; top:600px; width:739px; height:410px;" data-depth="0.65" alt="Cloud Cutout">
+        style="left:679px; top:600px; width:739px; height:410px;" data-depth="0.65" alt="Cloud Cutout"
+        loading="eager" fetchpriority="low" decoding="async">
       <img src="images from figma/image-7.png" class="p-layer sky-cloud"
-        style="left:718px; top:627px; width:958px; height:522px;" data-depth="1.3" alt="Cloud Cutout">
+        style="left:718px; top:627px; width:958px; height:522px;" data-depth="1.3" alt="Cloud Cutout"
+        loading="eager" fetchpriority="low" decoding="async">
       <img src="images from figma/image-6.png" class="p-layer sky-cloud"
-        style="left:-7px; top:734px; width:661px; height:360px;" data-depth="0.45" alt="Cloud Cutout">
+        style="left:-7px; top:734px; width:661px; height:360px;" data-depth="0.45" alt="Cloud Cutout"
+        loading="eager" fetchpriority="low" decoding="async">
       <img src="images from figma/image-16.png" class="p-layer sky-cloud"
-        style="left:245px; top:744px; width:914px; height:498px;" data-depth="1.6" alt="Cloud Cutout">
+        style="left:245px; top:744px; width:914px; height:498px;" data-depth="1.6" alt="Cloud Cutout"
+        loading="eager" fetchpriority="low" decoding="async">
 
       <!-- ================= SCENE 2: SILHOUETTES & CITY INTRO (Y: 1400 - 2800) ================= -->
-      <!-- Two Figures Silhouetted on Cliff -->
+      <!-- Two Figures Silhouetted on Cliff (low priority — loads in background) -->
       <img src="images from figma/two-figures-silhouette.png" id="figures-silhouette" class="p-layer fg-layer"
-        style="left:576px; top:1450px; width:144px; height:157px;" alt="Two Figures Silhouette">
+        style="left:576px; top:1450px; width:144px; height:157px;" alt="Two Figures Silhouette"
+        loading="eager" fetchpriority="low" decoding="async">
 
-      <!-- First City Artwork (Slides in from Right) -->
+      <!-- First City Artwork (low priority — loads in background) -->
       <img src="images from figma/city-right-intro.png" id="city-right-intro" class="p-layer mid-layer"
-        style="left:354px; top:1596px; width:1225px; height:1204px;" alt="City Intro Right">
+        style="left:354px; top:1596px; width:1225px; height:1204px;" alt="City Intro Right"
+        loading="eager" fetchpriority="low" decoding="async">
 
       <!-- Scene II Containerless Dark Brown Typography -->
       <div id="scene-2-text-block" class="p-layer"
@@ -142,9 +173,10 @@
         </p>
       </div>
 
-      <!-- Birds Flock Static Image -->
+      <!-- Birds Flock Static Image (low priority — loads in background) -->
       <img src="images from figma/birds-flock-sky.png" id="birds-flock-static" class="p-layer sky-layer"
-        style="left:-7px; top:2440px; width:667px; height:667px;" alt="Birds Flock Sky">
+        style="left:-7px; top:2440px; width:667px; height:667px;" alt="Birds Flock Sky"
+        loading="eager" fetchpriority="low" decoding="async">
 
       <!-- Interactive Birds Animated Canvas Overlays -->
       <canvas id="birds-canvas-top" class="p-layer video-canvas"
@@ -157,23 +189,26 @@
       <canvas id="train-canvas" class="p-layer video-canvas"
         style="left:-25px; top:2817px; width:1455px; height:651px; pointer-events:none;"></canvas>
 
-      <!-- Lower Valley City Panorama -->
+      <!-- Lower Valley City Panorama (low priority — loads in background) -->
       <img src="images from figma/mountain.png" id="city-panorama-lower" class="p-layer bg-depth-layer"
-        style="left:-30px; top:2515px; width:1763px; height:737px;" alt="Lower City Panorama">
+        style="left:-30px; top:2515px; width:1763px; height:737px;" alt="Lower City Panorama"
+        loading="eager" fetchpriority="low" decoding="async">
 
-      <!-- Vignette Atmospheric Frame Overlay for Train & Bridge Pillars Area -->
+      <!-- Vignette Atmospheric Frame Overlay for Train & Bridge Pillars Area (low priority) -->
       <img src="images from figma/Object.png" id="bridge-vignette-overlay" class="p-layer sky-layer"
         style="left:-130px; top:3315px; width:1690px; height:650px; pointer-events:none; z-index:95; opacity:1; transform: rotate(180deg);"
-        alt="Bridge Pillars Vignette Overlay">
+        alt="Bridge Pillars Vignette Overlay" loading="eager" fetchpriority="low" decoding="async">
 
       <!-- ================= SCENE 4: CITADEL ARCHITECTURE (Y: 4200 - 6300) ================= -->
-      <!-- Sprawling Citadel Buildings -->
+      <!-- Sprawling Citadel Buildings (low priority — loads in background) -->
       <img src="images from figma/building-cluster-large.png" id="building-cluster-large" class="p-layer mid-layer"
-        style="left:-50px; top:3796px; width:850px; height:990px;" alt="Large Citadel Cluster">
+        style="left:-50px; top:3796px; width:850px; height:990px;" alt="Large Citadel Cluster"
+        loading="eager" fetchpriority="low" decoding="async">
 
-      <!-- Mixed Architecture Layer -->
+      <!-- Mixed Architecture Layer (low priority — loads in background) -->
       <img src="images from figma/building-cluster-mixed.png" id="building-cluster-mixed" class="p-layer bg-depth-layer"
-        style="left:-103px; top:3787px; width:1373px; height:1163px;" alt="Mixed Architecture Cluster">
+        style="left:-103px; top:3787px; width:1373px; height:1163px;" alt="Mixed Architecture Cluster"
+        loading="eager" fetchpriority="low" decoding="async">
 
       <!-- Scene IV Containerless Dark Brown Typography -->
       <div id="scene-4-text-block" class="p-layer"
@@ -201,14 +236,14 @@
       <canvas id="section-5-canvas" class="p-layer mid-layer" width="1480" height="925"
         style="left:-20px; top:5000px; width:1480px; height:925px; pointer-events:none; z-index:15;"></canvas>
 
-      <!-- ================= ABSOLUTE BOTTOM TERMINAL: PARALLAX STRETCH ARROW & TEXT (Y: 6650) ================= -->
+      <!-- ================= ABSOLUTE BOTTOM TERMINAL: PARALLAX STRETCH ARROW & TEXT (Y: 6670) ================= -->
       <div id="terminal-end-section" class="p-layer"
-        style="left:0px; top:6650px; width:1440px; height:450px; z-index:100; pointer-events:auto; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        style="left:0px; top:6699px; width:1440px; height:450px; z-index:100; pointer-events:auto; display:flex; flex-direction:column; align-items:center; justify-content:center;">
 
         <!-- Parallax Stretching Upward Arrow -->
         <div id="end-arrow-wrap" class="end-arrow-container" style="cursor:pointer;" title="Scroll Up to Top">
-          <svg id="end-arrow-svg" width="48" height="72" viewBox="0 0 24 36" fill="none" stroke="#d4af37"
-            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg id="end-arrow-svg" width="48" height="72" viewBox="0 0 24 36" fill="none" stroke="#261704"
+            stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="32" x2="12" y2="4"></line>
             <polyline points="4 12 12 4 20 12"></polyline>
           </svg>

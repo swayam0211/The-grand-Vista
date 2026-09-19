@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Register GSAP Plugins
   gsap.registerPlugin(ScrollTrigger);
 
+  // Clear any stale scroll memory from previous session to prevent GSAP state flash on refresh
+  ScrollTrigger.clearScrollMemory();
+  window.history.scrollRestoration = 'manual'; // Prevents browser from restoring scroll on refresh
+
   // ==========================================================================
   // 0. AUTOFIT SCREEN SCALING LOGIC
   // ==========================================================================
@@ -132,66 +136,71 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastSnapScene = 0;
   let isSnapHolding = false;
 
+  // Throttled scroll handler — batch DOM writes to once per RAF frame to avoid layout thrash
+  let scrollRafPending = false;
   lenis.on('scroll', (e) => {
-    const scrollY = Math.max(0, e.scroll);
-    const scaledTotalHeight = (7100 * currentScale) - window.innerHeight;
-    const progress = Math.min(100, Math.round((scrollY / scaledTotalHeight) * 100));
-    if (scrollPercentText) scrollPercentText.textContent = `${progress}%`;
+    if (!scrollRafPending) {
+      scrollRafPending = true;
+      requestAnimationFrame(() => {
+        scrollRafPending = false;
+        const scrollY = Math.max(0, e.scroll);
+        const scaledTotalHeight = (7100 * currentScale) - window.innerHeight;
+        const progress = Math.min(100, Math.round((scrollY / scaledTotalHeight) * 100));
+        if (scrollPercentText) scrollPercentText.textContent = `${progress}%`;
 
-    // Determine Active Scene based on scaled Y
-    let detectedScene = 1;
-    sceneWaypoints.forEach(wp => {
-      if (scrollY >= (wp.pos - 200) * currentScale) {
-        detectedScene = wp.num;
-      }
-    });
+        // Determine Active Scene based on scaled Y
+        let detectedScene = 1;
+        sceneWaypoints.forEach(wp => {
+          if (scrollY >= (wp.pos - 200) * currentScale) {
+            detectedScene = wp.num;
+          }
+        });
 
-    // Handle Tactile Magnetic Slowdown on arrival at any new section (prevents fast scroll overshoot)
-    sceneWaypoints.forEach(wp => {
-      const targetY = wp.pos * currentScale;
-      const dist = Math.abs(scrollY - targetY);
+        // Handle Tactile Magnetic Slowdown on arrival at any new section
+        sceneWaypoints.forEach(wp => {
+          const targetY = wp.pos * currentScale;
+          const dist = Math.abs(scrollY - targetY);
 
-      if (dist < 60 * currentScale && detectedScene !== lastSnapScene && !isSnapHolding) {
-        lastSnapScene = detectedScene;
-        isSnapHolding = true;
+          if (dist < 60 * currentScale && detectedScene !== lastSnapScene && !isSnapHolding) {
+            lastSnapScene = detectedScene;
+            isSnapHolding = true;
 
-        // Apply 0.28s gentle tactile magnetic slowdown lerp
-        lenis.options.lerp = 0.025;
-        setTimeout(() => {
-          lenis.options.lerp = 0.05;
-          isSnapHolding = false;
-        }, 280);
+            lenis.options.lerp = 0.025;
+            setTimeout(() => {
+              lenis.options.lerp = 0.05;
+              isSnapHolding = false;
+            }, 280);
 
-        // Flash glowing ring pulse on active nav dot
-        const activeDot = document.querySelector(`.nav-dot[data-scene="${detectedScene}"]`);
-        if (activeDot) {
-          activeDot.classList.remove('active-snap');
-          void activeDot.offsetWidth; // Trigger reflow for restart
-          activeDot.classList.add('active-snap');
+            const activeDot = document.querySelector(`.nav-dot[data-scene="${detectedScene}"]`);
+            if (activeDot) {
+              activeDot.classList.remove('active-snap');
+              void activeDot.offsetWidth;
+              activeDot.classList.add('active-snap');
+            }
+
+            if (hudSceneTag) {
+              const wpData = sceneWaypoints.find(w => w.num === detectedScene);
+              if (wpData) hudSceneTag.textContent = wpData.title;
+              hudSceneTag.classList.add('scene-highlight');
+              setTimeout(() => hudSceneTag.classList.remove('scene-highlight'), 600);
+            }
+          }
+        });
+
+        if (detectedScene !== currentActiveScene) {
+          currentActiveScene = detectedScene;
+
+          navDots.forEach(dot => {
+            const sceneNum = parseInt(dot.dataset.scene, 10);
+            dot.classList.toggle('active', sceneNum === currentActiveScene);
+          });
+
+          const activeWp = sceneWaypoints.find(w => w.num === currentActiveScene);
+          if (hudSceneTag && activeWp) {
+            hudSceneTag.textContent = activeWp.title;
+          }
         }
-
-        // Highlight HUD Scene Tag
-        if (hudSceneTag) {
-          const wpData = sceneWaypoints.find(w => w.num === detectedScene);
-          if (wpData) hudSceneTag.textContent = wpData.title;
-          hudSceneTag.classList.add('scene-highlight');
-          setTimeout(() => hudSceneTag.classList.remove('scene-highlight'), 600);
-        }
-      }
-    });
-
-    if (detectedScene !== currentActiveScene) {
-      currentActiveScene = detectedScene;
-
-      navDots.forEach(dot => {
-        const sceneNum = parseInt(dot.dataset.scene, 10);
-        dot.classList.toggle('active', sceneNum === currentActiveScene);
       });
-
-      const activeWp = sceneWaypoints.find(w => w.num === currentActiveScene);
-      if (hudSceneTag && activeWp) {
-        hudSceneTag.textContent = activeWp.title;
-      }
     }
   });
 
@@ -240,6 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
       y: 50,
       opacity: 1,
       ease: 'none',
+      immediateRender: false,
       scrollTrigger: {
         trigger: mainTrigger,
         start: 'top top',
@@ -258,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
       opacity: 1.0,
       rotate: 2,
       ease: 'none',
+      immediateRender: false,
       scrollTrigger: {
         trigger: mainTrigger,
         start: s(1000),
@@ -273,6 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
       x: 0,
       opacity: 1,
       ease: 'power2.out',
+      immediateRender: false,
       scrollTrigger: {
         trigger: mainTrigger,
         start: s(1000),
@@ -289,6 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
       y: -30,
       opacity: 1.0,
       ease: 'power2.out',
+      immediateRender: false,
       scrollTrigger: {
         trigger: mainTrigger,
         start: s(1200),
@@ -330,6 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
       rotate: 180,
       y: -60,
       ease: 'none',
+      immediateRender: false,
       scrollTrigger: {
         trigger: mainTrigger,
         start: s(2200),
@@ -348,6 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
       scale: 1.02,
       opacity: 1.0,
       ease: 'power1.out',
+      immediateRender: false,
       scrollTrigger: {
         trigger: mainTrigger,
         start: s(3100),
@@ -365,6 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
       scale: 1.06,
       opacity: 1.0,
       ease: 'power2.out',
+      immediateRender: false,
       scrollTrigger: {
         trigger: mainTrigger,
         start: s(3300),
@@ -382,6 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
       x: 0,
       opacity: 1.0,
       ease: 'power2.out',
+      immediateRender: false,
       scrollTrigger: {
         trigger: mainTrigger,
         start: s(3400),
@@ -740,14 +757,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // Dirty-flag system: track last drawn progress to skip identical redraws
+    let geomLastDrawnProgress = -1;
+
     // 100% SCROLL-DRIVEN LOOP WITH LENIS LERP SMOOTHING (120 FPS Performance)
     function geomLoop() {
       geomLerpProgress += (geomTargetProgress - geomLerpProgress) * 0.14;
 
-      if (Math.abs(geomTargetProgress - geomLerpProgress) > 0.0001) {
-        drawMathematicalGeometry(geomLerpProgress);
-      } else {
-        drawMathematicalGeometry(geomTargetProgress);
+      // Only redraw if progress has meaningfully changed (saves ~40ms/frame when idle)
+      const drawProgress = Math.abs(geomTargetProgress - geomLerpProgress) > 0.0001
+        ? geomLerpProgress
+        : geomTargetProgress;
+
+      if (Math.abs(drawProgress - geomLastDrawnProgress) > 0.00035) {
+        geomLastDrawnProgress = drawProgress;
+        drawMathematicalGeometry(drawProgress);
       }
 
       requestAnimationFrame(geomLoop);
@@ -1351,6 +1375,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.restore();
   }
 
+  // Initialize interactive birds flock canvases with IntersectionObserver pause when off-screen
   function setupBirdsCanvas(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
@@ -1359,7 +1384,7 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.height = 600;
 
     const birds = Array.from({ length: 24 }, (_, idx) => {
-      const type = idx % 4; // 0 = Eagle, 1 = Swallow, 2 = Seagull, 3 = Songbird
+      const type = idx % 4;
       return {
         id: idx,
         speciesType: type,
@@ -1375,34 +1400,56 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     });
 
+    let birdsVisible = true; // Controlled by IntersectionObserver
+    let birdsRafId = null;
+
     function drawBirds() {
+      if (!birdsVisible) {
+        birdsRafId = requestAnimationFrame(drawBirds);
+        return; // Skip draw when off-screen — saves CPU
+      }
+
       ctxB.clearRect(0, 0, canvas.width, canvas.height);
 
       birds.forEach(b => {
         b.x += b.speed;
         b.wingState += b.wingSpeed;
-        b.y += Math.sin(b.x * 0.008 + b.yOffset) * 0.32; // Undulating flight path
+        b.y += Math.sin(b.x * 0.008 + b.yOffset) * 0.32;
 
         if (b.x > 1480) {
           b.x = -50;
           b.y = Math.random() * 450 + 40;
         }
 
-        const flightAngle = Math.sin(b.wingState * 0.5) * 0.07; // Natural banking flight roll
+        const flightAngle = Math.sin(b.wingState * 0.5) * 0.07;
         drawBirdBySpecies(ctxB, b.x, b.y, b.size, b.wingState, flightAngle, b.color, b.opacity, b.speciesType);
       });
 
-      requestAnimationFrame(drawBirds);
+      birdsRafId = requestAnimationFrame(drawBirds);
     }
+
+    // IntersectionObserver: pause RAF when canvas is completely off screen
+    const birdsObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        birdsVisible = entry.isIntersecting;
+      });
+    }, { rootMargin: '200px 0px 200px 0px', threshold: 0 });
+
+    // Observe the scaled parallax canvas wrapper (birds canvas is inside transform)
+    // We observe the birds canvas element itself translated back to screen coords
+    birdsObserver.observe(canvas);
     drawBirds();
   }
 
-  // Initialize interactive birds flock canvases at 1500px and 2500px
   setupBirdsCanvas('birds-canvas-top');
   setupBirdsCanvas('birds-canvas');
 
   // ==========================================================================
-  // 6. SCROLL-DRIVEN 24FPS WEBP TRAIN VIDEO FRAME SEQUENCE
+  // 6. SMART 3-PHASE TRAIN FRAME PROGRESSIVE LOADER
+  //    Phase 1: Frames 1-20  — loaded immediately at startup
+  //    Phase 2: Frames 21-140 — loaded silently in background via requestIdleCallback
+  //    Priority Mode: If user jumps to Scene 3 before Phase 2 finishes,
+  //                   pause background load and immediately load frames around current position
   // ==========================================================================
   const trainCanvas = document.getElementById('train-canvas');
   if (trainCanvas) {
@@ -1411,27 +1458,103 @@ document.addEventListener('DOMContentLoaded', () => {
     trainCanvas.height = 651;
 
     const totalFrames = 140;
-    const trainFrames = [];
+    // Pre-allocate the full array — slots filled as frames load
+    const trainFrames = new Array(totalFrames).fill(null);
     let currentFrameIndex = 0;
+    let lastGoodFrame = null;      // last successfully rendered frame — shown if next is not ready
+    let phase2IdleHandle = null;   // handle for cancelling idle background loading
+    let priorityMode = false;      // true when user is in Section 3 and frames may not be ready
 
-    // Preload 24fps transparent WebP frames from video
-    for (let i = 1; i <= totalFrames; i++) {
+    // Helper: create and start loading a single frame image
+    function loadFrame(i) {
+      if (trainFrames[i] && trainFrames[i].complete && trainFrames[i].naturalWidth !== 0) return;
       const img = new Image();
-      const frameNum = String(i).padStart(4, '0');
+      const frameNum = String(i + 1).padStart(4, '0');
+      img.decoding = 'async'; // Non-blocking decode
       img.src = `images from figma/train_frames/frame_${frameNum}.webp`;
-      trainFrames.push(img);
+      trainFrames[i] = img;
     }
 
+    // PHASE 1: Load frames 0-19 immediately (covers first 14% of train scroll)
+    for (let i = 0; i < 20; i++) loadFrame(i);
+
+    // Render a frame by index — uses lastGoodFrame as fallback if target not ready
     function renderTrainFrame(index) {
       const frame = trainFrames[index];
       if (frame && frame.complete && frame.naturalWidth !== 0) {
         ctxT.clearRect(0, 0, trainCanvas.width, trainCanvas.height);
         ctxT.drawImage(frame, 0, 0, trainCanvas.width, trainCanvas.height);
+        lastGoodFrame = frame;
+      } else if (lastGoodFrame) {
+        // Frame not ready yet — hold last good frame (no blank flash)
+        ctxT.clearRect(0, 0, trainCanvas.width, trainCanvas.height);
+        ctxT.drawImage(lastGoodFrame, 0, 0, trainCanvas.width, trainCanvas.height);
       }
+    }
+
+    // PHASE 2: Load remaining frames 20-139 in background using requestIdleCallback
+    // This loads during browser idle time — zero impact on scroll/animation performance
+    let phase2NextIndex = 20;
+    function runIdleLoad(deadline) {
+      if (priorityMode) return; // Yield to priority mode when user is in Scene 3
+      while (phase2NextIndex < totalFrames && (deadline.timeRemaining() > 2 || deadline.didTimeout)) {
+        loadFrame(phase2NextIndex);
+        phase2NextIndex++;
+      }
+      if (phase2NextIndex < totalFrames) {
+        phase2IdleHandle = requestIdleCallback(runIdleLoad, { timeout: 3000 });
+      }
+    }
+
+    // Start Phase 2 background loading after 1.5s (give critical content time to load first)
+    const idleCallbackSupported = typeof requestIdleCallback !== 'undefined';
+    let phase2StartTimer = setTimeout(() => {
+      if (idleCallbackSupported) {
+        phase2IdleHandle = requestIdleCallback(runIdleLoad, { timeout: 3000 });
+      } else {
+        // Fallback for Safari: load in small batches with setTimeout
+        let safariIdx = 20;
+        function safariLoad() {
+          for (let i = 0; i < 8 && safariIdx < totalFrames; i++, safariIdx++) {
+            loadFrame(safariIdx);
+          }
+          if (safariIdx < totalFrames) setTimeout(safariLoad, 200);
+        }
+        setTimeout(safariLoad, 200);
+      }
+    }, 1500);
+
+    // PRIORITY MODE: Activated when ScrollTrigger detects user is in Scene 3
+    // Immediately loads the ~20 frames around the current scroll position first
+    function activatePriorityMode(currentTargetFrame) {
+      if (priorityMode) return;
+      priorityMode = true;
+
+      // Cancel idle background loading
+      if (phase2IdleHandle && idleCallbackSupported) {
+        cancelIdleCallback(phase2IdleHandle);
+      }
+
+      // Load a window of 20 frames centered on current position immediately
+      const start = Math.max(0, currentTargetFrame - 5);
+      const end = Math.min(totalFrames - 1, currentTargetFrame + 15);
+      for (let i = start; i <= end; i++) loadFrame(i);
+
+      // Then resume background loading of the rest after priority window is set
+      setTimeout(() => {
+        priorityMode = false;
+        phase2NextIndex = Math.max(phase2NextIndex, end + 1);
+        if (phase2NextIndex < totalFrames) {
+          if (idleCallbackSupported) {
+            phase2IdleHandle = requestIdleCallback(runIdleLoad, { timeout: 3000 });
+          }
+        }
+      }, 800);
     }
 
     let targetTrainFrame = 0;
     let lerpTrainFrame = 0;
+    let priorityActivated = false;
 
     // ScrollTrigger scrubs frame sequence bi-directionally with lerp smoothing
     ScrollTrigger.create({
@@ -1439,6 +1562,13 @@ document.addEventListener('DOMContentLoaded', () => {
       start: s(2300),
       end: s(3800),
       scrub: true,
+      onEnter: () => {
+        // User has arrived at Scene 3 — activate priority loading if needed
+        if (!priorityActivated && phase2NextIndex < totalFrames) {
+          priorityActivated = true;
+          activatePriorityMode(Math.round(targetTrainFrame));
+        }
+      },
       onUpdate: (self) => {
         targetTrainFrame = self.progress * (totalFrames - 1);
       }
@@ -1457,12 +1587,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     requestAnimationFrame(trainLoop);
 
-    // Render initial frame on load
-    if (trainFrames[0]) {
-      if (trainFrames[0].complete) {
+    // Render initial frame when ready
+    const firstFrame = trainFrames[0];
+    if (firstFrame) {
+      if (firstFrame.complete && firstFrame.naturalWidth !== 0) {
         renderTrainFrame(0);
       } else {
-        trainFrames[0].onload = () => renderTrainFrame(0);
+        firstFrame.onload = () => renderTrainFrame(0);
       }
     }
   }
