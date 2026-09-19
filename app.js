@@ -753,311 +753,435 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     requestAnimationFrame(geomLoop);
 
+    // ------------------------------------------------------------------------
+    // SACRED GEOMETRY: GOLDEN RATIO FIBONACCI BLUEPRINT & CELESTIAL STARDUST ENGINE
+    // (100% Matching User Reference Image in Dark Brown Theme Palette!)
+    // ------------------------------------------------------------------------
+
+    // Pre-calculate Spline Path for the 3 Connecting Vector Lines
+    const pathNodes = [
+      { x: 720, y: 150 },
+      { x: 1330, y: 1100 },
+      { x: 380, y: 1850 },
+      { x: 1140, y: 2600 },
+      { x: 720, y: 3200 }
+    ];
+
+    function getCatmullRomPoint(p0, p1, p2, p3, t) {
+      const t2 = t * t;
+      const t3 = t2 * t;
+      const f0 = -0.5 * t3 + t2 - 0.5 * t;
+      const f1 = 1.5 * t3 - 2.5 * t2 + 1.0;
+      const f2 = -1.5 * t3 + 2.0 * t2 + 0.5 * t;
+      const f3 = 0.5 * t3 - 0.5 * t2;
+      return {
+        x: f0 * p0.x + f1 * p1.x + f2 * p2.x + f3 * p3.x,
+        y: f0 * p0.y + f1 * p1.y + f2 * p2.y + f3 * p3.y
+      };
+    }
+
+    const splinePoints = [];
+    const stepsPerSeg = 80;
+    for (let i = 0; i < pathNodes.length - 1; i++) {
+      const p0 = pathNodes[Math.max(0, i - 1)];
+      const p1 = pathNodes[i];
+      const p2 = pathNodes[i + 1];
+      const p3 = pathNodes[Math.min(pathNodes.length - 1, i + 2)];
+
+      for (let s = 0; s < stepsPerSeg; s++) {
+        const t = s / stepsPerSeg;
+        splinePoints.push(getCatmullRomPoint(p0, p1, p2, p3, t));
+      }
+    }
+    splinePoints.push(pathNodes[pathNodes.length - 1]);
+
+    // Pre-calculated Stardust Particle Array for Smooth 120 FPS Physics
+    const stardustParticles = [];
+    const numStardust = 80;
+    for (let i = 0; i < numStardust; i++) {
+      stardustParticles.push({
+        angle: Math.random() * Math.PI * 2,
+        distance: Math.random() * 220 + 15,
+        speed: (Math.random() * 0.008 + 0.003) * (Math.random() > 0.5 ? 1 : -1),
+        size: Math.random() * 3.0 + 0.8,
+        pulseOffset: Math.random() * Math.PI * 2,
+        colorIdx: i % 3
+      });
+    }
+
+    function drawConnectingLines(ctx, pathProgress, scrollMotion) {
+      if (pathProgress <= 0.005) return;
+
+      const darkBrown = '#322008';
+      const medBrown = '#503104';
+      const ochreBrown = '#784c0a';
+
+      const totalPts = splinePoints.length - 1;
+
+      // Dynamic traveling window parameters (draws and moves live with scroll)
+      const headIdx = Math.min(totalPts, Math.floor(pathProgress * 1.2 * totalPts));
+      const windowLen = Math.floor(totalPts * 0.38); // ~120 spline points long (~900px visible line segment)
+      const startIdx = Math.max(0, headIdx - windowLen);
+
+      if (headIdx - startIdx < 2) return;
+
+      ctx.save();
+      ctx.globalAlpha = Math.min(1.0, pathProgress * 3.0);
+
+      // Compute normals for offset parallel paths along active segment window
+      const leftLine = [];
+      const rightLine = [];
+      const offsetDist = 14;
+
+      for (let i = startIdx; i <= headIdx; i++) {
+        const pt = splinePoints[i];
+        let nx = 0, ny = -1;
+        if (i < totalPts) {
+          const nextPt = splinePoints[i + 1];
+          const dx = nextPt.x - pt.x;
+          const dy = nextPt.y - pt.y;
+          const len = Math.hypot(dx, dy) || 1;
+          nx = -dy / len;
+          ny = dx / len;
+        } else if (i > 0) {
+          const prevPt = splinePoints[i - 1];
+          const dx = pt.x - prevPt.x;
+          const dy = pt.y - prevPt.y;
+          const len = Math.hypot(dx, dy) || 1;
+          nx = -dy / len;
+          ny = dx / len;
+        }
+
+        leftLine.push({ x: pt.x + nx * offsetDist, y: pt.y + ny * offsetDist });
+        rightLine.push({ x: pt.x - nx * offsetDist, y: pt.y - ny * offsetDist });
+      }
+
+      // --- 1. CENTER SPINE LINE (Solid Dark Ink with Soft Tapering) ---
+      ctx.strokeStyle = darkBrown;
+      ctx.lineWidth = 2.2;
+      ctx.shadowColor = 'rgba(50, 32, 8, 0.4)';
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.moveTo(splinePoints[startIdx].x, splinePoints[startIdx].y);
+      for (let i = startIdx + 1; i <= headIdx; i++) {
+        ctx.lineTo(splinePoints[i].x, splinePoints[i].y);
+      }
+      ctx.stroke();
+
+      // --- 2. LEFT PARALLEL CONNECTING LINE (Dashed Med Brown, scrolling with travel) ---
+      ctx.strokeStyle = medBrown;
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([7, 5]);
+      ctx.lineDashOffset = -scrollMotion * 14;
+      ctx.beginPath();
+      ctx.moveTo(leftLine[0].x, leftLine[0].y);
+      for (let i = 1; i < leftLine.length; i++) {
+        ctx.lineTo(leftLine[i].x, leftLine[i].y);
+      }
+      ctx.stroke();
+
+      // --- 3. RIGHT PARALLEL CONNECTING LINE (Dashed Ochre Brown, scrolling with travel) ---
+      ctx.strokeStyle = ochreBrown;
+      ctx.lineWidth = 1.0;
+      ctx.setLineDash([4, 8]);
+      ctx.lineDashOffset = scrollMotion * 18;
+      ctx.beginPath();
+      ctx.moveTo(rightLine[0].x, rightLine[0].y);
+      for (let i = 1; i < rightLine.length; i++) {
+        ctx.lineTo(rightLine[i].x, rightLine[i].y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // --- 4. LEADING DRAWING TIP CROSSHAIR & ARROW (Moves live with scroll) ---
+      if (headIdx > 0 && headIdx < totalPts) {
+        const leadPt = splinePoints[headIdx];
+        const prevPt = splinePoints[Math.max(0, headIdx - 2)];
+        const dirAng = Math.atan2(leadPt.y - prevPt.y, leadPt.x - prevPt.x);
+
+        ctx.save();
+        ctx.translate(leadPt.x, leadPt.y);
+        ctx.rotate(dirAng);
+
+        // Leading arrow tip
+        ctx.fillStyle = darkBrown;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-8, -4);
+        ctx.lineTo(-5, 0);
+        ctx.lineTo(-8, 4);
+        ctx.closePath();
+        ctx.fill();
+
+        // Pulsing drawing head dot
+        ctx.fillStyle = ochreBrown;
+        ctx.beginPath();
+        ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = darkBrown;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(0, 0, 7.0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      // --- 5. TRAVELING PARTICLES ALONG ACTIVE CONNECTING WINDOW ---
+      const numBeads = 4;
+      const segLen = headIdx - startIdx;
+      for (let b = 0; b < numBeads; b++) {
+        const beadFrac = ((pathProgress * 3.0 + b / numBeads) % 1.0);
+        const beadIdx = Math.floor(startIdx + beadFrac * segLen);
+
+        if (beadIdx >= startIdx && beadIdx <= headIdx && beadIdx < totalPts) {
+          const pt = splinePoints[beadIdx];
+          ctx.fillStyle = ochreBrown;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 3.0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      ctx.restore();
+    }
+
+    function drawGoldenRatioFibonacciBlueprint(ctx, cx, cy, progress, scrollMotion, scaleFactor = 0.85) {
+      ctx.save();
+
+      const darkBrown = '#322008';
+      const medBrown = '#503104';
+      const ochreBrown = '#784c0a';
+      const paletteColors = [darkBrown, medBrown, ochreBrown];
+
+      // --- 1. NESTED GOLDEN RECTANGLES & GRID LINES ---
+      ctx.strokeStyle = darkBrown;
+      ctx.shadowColor = 'rgba(80, 49, 4, 0.4)';
+      ctx.shadowBlur = 4;
+      ctx.lineWidth = 1.1 * scaleFactor;
+      ctx.globalAlpha = Math.min(1.0, progress * 1.5);
+
+      // Golden ratio box dimensions (~20px tighter sizing)
+      const boxes = [
+        { x: cx - 10 * scaleFactor, y: cy - 10 * scaleFactor, w: 20 * scaleFactor, h: 20 * scaleFactor },
+        { x: cx - 10 * scaleFactor, y: cy - 30 * scaleFactor, w: 20 * scaleFactor, h: 20 * scaleFactor },
+        { x: cx + 10 * scaleFactor, y: cy - 30 * scaleFactor, w: 40 * scaleFactor, h: 40 * scaleFactor },
+        { x: cx - 50 * scaleFactor, y: cy - 30 * scaleFactor, w: 60 * scaleFactor, h: 60 * scaleFactor },
+        { x: cx - 50 * scaleFactor, y: cy + 30 * scaleFactor, w: 100 * scaleFactor, h: 100 * scaleFactor },
+        { x: cx + 50 * scaleFactor, y: cy - 90 * scaleFactor, w: 160 * scaleFactor, h: 160 * scaleFactor }
+      ];
+
+      // Draw Golden Rectangles
+      boxes.forEach((box, i) => {
+        if (progress > i * 0.08) {
+          ctx.strokeRect(box.x, box.y, box.w, box.h);
+
+          // Crosshair ticks inside boxes
+          ctx.beginPath();
+          ctx.moveTo(box.x + box.w / 2 - 3, box.y + box.h / 2);
+          ctx.lineTo(box.x + box.w / 2 + 3, box.y + box.h / 2);
+          ctx.moveTo(box.x + box.w / 2, box.y + box.h / 2 - 3);
+          ctx.lineTo(box.x + box.w / 2, box.y + box.h / 2 + 3);
+          ctx.stroke();
+        }
+      });
+
+      // Central Axis Construction Lines
+      ctx.setLineDash([3, 4]);
+      ctx.lineWidth = 0.9 * scaleFactor;
+      ctx.strokeStyle = medBrown;
+      ctx.beginPath();
+      ctx.moveTo(cx - 230 * scaleFactor, cy);
+      ctx.lineTo(cx + 230 * scaleFactor, cy);
+      ctx.moveTo(cx, cy - 290 * scaleFactor);
+      ctx.lineTo(cx, cy + 290 * scaleFactor);
+      ctx.stroke();
+
+      // Diagonal Ray Construction Guides (~20px smaller)
+      ctx.setLineDash([2, 5]);
+      ctx.beginPath();
+      ctx.moveTo(cx - 180 * scaleFactor, cy - 180 * scaleFactor);
+      ctx.lineTo(cx + 180 * scaleFactor, cy + 180 * scaleFactor);
+      ctx.moveTo(cx + 180 * scaleFactor, cy - 180 * scaleFactor);
+      ctx.lineTo(cx - 180 * scaleFactor, cy + 180 * scaleFactor);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // --- 2. LOGARITHMIC FIBONACCI SPIRAL ARC (DRAWN LIVE STROKE-BY-STROKE) ---
+      const maxAngle = Math.PI * 3.8 * Math.min(1.0, progress * 1.4);
+      const a = 4.5 * scaleFactor;
+      const b = 0.306349; // Logarithmic growth factor for Golden Ratio phi
+
+      if (maxAngle > 0.05) {
+        // Heavy main ink spiral stroke
+        ctx.strokeStyle = darkBrown;
+        ctx.lineWidth = 2.2 * scaleFactor;
+        ctx.beginPath();
+
+        const steps = 180;
+        for (let i = 0; i <= steps; i++) {
+          const theta = (i / steps) * maxAngle;
+          const r = a * Math.exp(b * theta);
+          const px = cx + Math.cos(theta + scrollMotion * 0.12) * r;
+          const py = cy + Math.sin(theta + scrollMotion * 0.12) * r;
+
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+
+        // Parallel Echo Line
+        ctx.lineWidth = 0.9 * scaleFactor;
+        ctx.strokeStyle = ochreBrown;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const theta = (i / steps) * maxAngle;
+          const r = (a + 3.5 * scaleFactor) * Math.exp(b * theta);
+          const px = cx + Math.cos(theta + scrollMotion * 0.12) * r;
+          const py = cy + Math.sin(theta + scrollMotion * 0.12) * r;
+
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // --- 3. CONCENTRIC COMPASS RINGS & DEGREE TICK MARKS (~20px smaller) ---
+      const ringRadii = [35, 75, 135, 215, 290];
+      ringRadii.forEach((radius, idx) => {
+        if (progress > 0.1 + idx * 0.12) {
+          const r = radius * scaleFactor;
+          ctx.strokeStyle = idx % 2 === 0 ? medBrown : darkBrown;
+          ctx.lineWidth = idx === 1 ? 1.5 * scaleFactor : 1.0 * scaleFactor;
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Azimuth degree tick marks
+          const ticks = 12;
+          for (let t = 0; t < ticks; t++) {
+            const rotA = (t / ticks) * Math.PI * 2 + scrollMotion * 0.15;
+            const x1 = cx + Math.cos(rotA) * (r - 3.5 * scaleFactor);
+            const y1 = cy + Math.sin(rotA) * (r - 3.5 * scaleFactor);
+            const x2 = cx + Math.cos(rotA) * (r + 3.5 * scaleFactor);
+            const y2 = cy + Math.sin(rotA) * (r + 3.5 * scaleFactor);
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+          }
+        }
+      });
+
+      // --- 4. RADIAL VECTOR RAYS & ARROWHEAD MARKERS ---
+      const rayAngles = [-0.6, 0.4, 1.2, 1.9, 2.7, 3.5, 4.2, 5.1];
+      rayAngles.forEach((ang, idx) => {
+        if (progress > 0.15 + idx * 0.08) {
+          const rotAng = ang + scrollMotion * 0.08;
+          const rayLen = (150 + idx * 18) * scaleFactor;
+          const endX = cx + Math.cos(rotAng) * rayLen;
+          const endY = cy + Math.sin(rotAng) * rayLen;
+
+          ctx.strokeStyle = darkBrown;
+          ctx.lineWidth = 1.1 * scaleFactor;
+          if (idx % 2 === 1) ctx.setLineDash([3, 4]);
+
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(endX, endY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Vector Arrowhead tip
+          const arrowSize = 6.5 * scaleFactor;
+          ctx.save();
+          ctx.translate(endX, endY);
+          ctx.rotate(rotAng);
+          ctx.fillStyle = darkBrown;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(-arrowSize, -arrowSize * 0.5);
+          ctx.lineTo(-arrowSize * 0.6, 0);
+          ctx.lineTo(-arrowSize, arrowSize * 0.5);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+
+          // Dotted nodes along vector rays
+          const dotCount = 4;
+          for (let d = 1; d <= dotCount; d++) {
+            const dotR = (rayLen / dotCount) * d;
+            const dx = cx + Math.cos(rotAng) * dotR;
+            const dy = cy + Math.sin(rotAng) * dotR;
+            ctx.fillStyle = darkBrown;
+            ctx.beginPath();
+            ctx.arc(dx, dy, 1.8 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      });
+
+      // --- 5. FLOATING CELESTIAL STARDUST PARTICLES ---
+      stardustParticles.forEach((p, i) => {
+        if (progress > 0.05) {
+          const curAngle = p.angle + scrollMotion * 0.2 + (progress * p.speed * 20);
+          const curDist = p.distance * scaleFactor * (0.8 + 0.4 * Math.sin(progress * Math.PI + p.pulseOffset));
+          const px = cx + Math.cos(curAngle) * curDist;
+          const py = cy + Math.sin(curAngle) * curDist;
+
+          const pAlpha = 0.4 + 0.5 * Math.sin(progress * Math.PI * 4 + p.pulseOffset);
+          ctx.globalAlpha = Math.max(0.1, Math.min(1.0, pAlpha));
+          ctx.fillStyle = paletteColors[p.colorIdx];
+          ctx.beginPath();
+          ctx.arc(px, py, p.size * scaleFactor, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // Center Core Focal Circle
+      ctx.globalAlpha = 1.0;
+      ctx.fillStyle = darkBrown;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 4.0 * scaleFactor, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = darkBrown;
+      ctx.lineWidth = 1.6 * scaleFactor;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 8.0 * scaleFactor, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
     function drawMathematicalGeometry(progress) {
       ctxG.clearRect(0, 0, geomCanvas.width, geomCanvas.height);
 
       const pathProgress = Math.min(1.0, progress * 1.35);
-
-      // Scroll-derived motion value (moves ONLY when user scrolls!)
       const scrollMotion = progress * Math.PI * 10;
 
-      // ------------------------------------------------------------------------
-      // 1. ORGANIC TENDRIL VORTEX & CONSTELLATION STREAM (MATCHING REFERENCE IMAGE!)
-      // 12 Fine Organic Tendril Threads with Micro-Dots Spiraling into a Tight Core
-      // ------------------------------------------------------------------------
       if (pathProgress > 0.02) {
-        drawOrganicTendrilVortexStream(ctxG, pathProgress, scrollMotion);
-      }
+        // Draw continuous 3 scroll-connecting vector lines
+        drawConnectingLines(ctxG, pathProgress, scrollMotion);
 
-      // ------------------------------------------------------------------------
-      // 2. FOCAL RETICLE NODES & HUD BADGE CARDS
-      // ------------------------------------------------------------------------
-      const nodes = {
-        citadel: { x: 1060, y: 1200, title: "CITADEL APEX", code: "3787px • 42.8° N", color: PALETTE.gold, glow: PALETTE.goldGlow },
-        minaretLeft: { x: 160, y: 1600, title: "MINARET SPIRE", code: "4900px • 18.4° E", color: PALETTE.rose, glow: PALETTE.roseGlow },
-        skyline: { x: 1280, y: 1650, title: "EUROPEAN DOME", code: "4950px • 64.2° W", color: PALETTE.cyan, glow: PALETTE.cyanGlow },
-        roadBase: { x: 650, y: 2450, title: "ROAD BASE", code: "5900px • ELEV 0m", color: PALETTE.mint, glow: PALETTE.mintGlow }
-      };
+        // Blueprint 1: Scene 3 Railway Bridge / River Apex (X: 1330, Y: 1100 - 20% off-screen right)
+        drawGoldenRatioFibonacciBlueprint(ctxG, 1330, 1100, pathProgress, scrollMotion, 0.65);
 
-      if (pathProgress > 0.35) {
-        drawEpicycloidGear(ctxG, nodes.citadel.x, nodes.citadel.y, 130, 39, 30, scrollMotion * 0.4, PALETTE.gold, PALETTE.cyan);
-        drawEpicycloidGear(ctxG, nodes.minaretLeft.x, nodes.minaretLeft.y, 120, 36, 28, -scrollMotion * 0.5, PALETTE.rose, PALETTE.amber);
-        drawEpicycloidGear(ctxG, nodes.skyline.x, nodes.skyline.y, 135, 40, 32, scrollMotion * 0.45, PALETTE.cyan, PALETTE.mint);
-        drawEpicycloidGear(ctxG, nodes.roadBase.x, nodes.roadBase.y, 125, 38, 29, -scrollMotion * 0.35, PALETTE.mint, PALETTE.gold);
-
-        Object.values(nodes).forEach((node) => {
-          drawHUDNodeBadge(ctxG, node);
-        });
-      }
-    }
-
-    // --- ORGANIC TENDRIL VORTEX & CONSTELLATION STREAM (3 LINES ONLY) ---
-    function drawOrganicTendrilVortexStream(ctx, progress, scrollMotion) {
-      const paletteColors = [PALETTE.gold, PALETTE.rose, PALETTE.mint];
-      const paletteGlows = [PALETTE.goldGlow, PALETTE.roseGlow, PALETTE.mintGlow];
-
-      const tendrilCount = 3; // Reduced to exactly 3 elegant lines
-      const waypoints = [
-        { x: 680, y: 640 },
-        { x: 650, y: 950 },
-        { x: 1080, y: 1200 },
-        { x: 260, y: 1550 },
-        { x: 520, y: 1950 },
-        { x: 650, y: 2450 }
-      ];
-
-      const totalSteps = 220;
-      const maxSteps = Math.floor(totalSteps * progress);
-
-      ctx.save();
-
-      // Render 3 Elegant Organic Tendril Threads
-      for (let t = 0; t < tendrilCount; t++) {
-        const color = paletteColors[t % paletteColors.length];
-        const glow = paletteGlows[t % paletteGlows.length];
-        const phase = (t / tendrilCount) * Math.PI * 2;
-
-        ctx.shadowColor = glow;
-        ctx.shadowBlur = 6;
-        ctx.strokeStyle = color;
-
-        const pathPoints = [];
-
-        for (let step = 0; step <= maxSteps; step++) {
-          const u = step / totalSteps;
-          let x, y, z = 0;
-
-          if (u < 0.40) {
-            // STAGE 1: Top Dynamic Fanned Horns & Vortex Funnel (Matching Reference Image!)
-            const funnelT = u / 0.40;
-            const cy = 165 + funnelT * (640 - 165);
-
-            // Radius tapers from wide fanned horns (220px) down to tight core (20px)
-            const radius = (220 * Math.pow(1.0 - funnelT, 1.2)) + 20;
-            const ry = radius * 0.38;
-
-            // Spiral twist angle
-            const angle = funnelT * Math.PI * 6 + phase + scrollMotion * 0.6;
-            z = Math.sin(angle);
-
-            // Wing flare out at top (matching reference image horns!)
-            const wingFlare = Math.pow(1.0 - funnelT, 2.0) * 80 * Math.sin(phase * 2);
-
-            x = 680 + Math.cos(angle) * radius + wingFlare;
-            y = cy + Math.sin(angle) * ry;
-          } else {
-            // STAGE 2: Seamless Tendril Stream Sweep through Citadel, Minaret, and Road Base
-            const sweepT = (u - 0.40) / 0.60;
-            const spinePt = getSplinePoint(waypoints, sweepT);
-            const nextPt = getSplinePoint(waypoints, Math.min(1.0, sweepT + 0.015));
-            const angle = Math.atan2(nextPt.y - spinePt.y, nextPt.x - spinePt.x);
-            const normalAngle = angle + Math.PI / 2;
-
-            const strandOffset = (28 * Math.sin(sweepT * Math.PI * 10 + phase + scrollMotion * 0.5)
-              + 12 * Math.cos(sweepT * Math.PI * 16 - scrollMotion * 0.3)) * (0.4 + (t % 4) * 0.25);
-
-            x = spinePt.x + Math.cos(normalAngle) * strandOffset;
-            y = spinePt.y + Math.sin(normalAngle) * strandOffset;
-          }
-
-          pathPoints.push({ x, y, z });
+        // Blueprint 2: Scene 4 Citadel Architecture Center (X: 380, Y: 1850)
+        if (pathProgress > 0.22) {
+          drawGoldenRatioFibonacciBlueprint(ctxG, 380, 1850, (pathProgress - 0.22) / 0.78, -scrollMotion * 0.8, 0.75);
         }
 
-        if (pathPoints.length < 2) continue;
-
-        // 1. Render Fine Tendril Thread Line (Matching Reference Image Thin Strokes!)
-        ctx.globalAlpha = 0.85;
-        ctx.lineWidth = 1.1 + (t % 3) * 0.3; // Fine 1.1px - 1.7px stroke
-        ctx.beginPath();
-        pathPoints.forEach((p, i) => {
-          if (i === 0) ctx.moveTo(p.x, p.y);
-          else ctx.lineTo(p.x, p.y);
-        });
-        ctx.stroke();
-
-        // 2. Render Solid Micro-Dots along Tendril Thread (Matching Reference Image Dots!)
-        ctx.globalAlpha = 0.95;
-        pathPoints.forEach((p, i) => {
-          if ((i + t * 3) % 9 === 0) {
-            // Dynamic micro-dot radius (1.2px to 2.8px)
-            const dotRadius = 1.3 + Math.sin(i * 0.2 + phase) * 1.3;
-
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, dotRadius, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        });
+        // Blueprint 3: Scene 5 Sanctuary / Sky Center (X: 1040, Y: 2600)
+        if (pathProgress > 0.45) {
+          drawGoldenRatioFibonacciBlueprint(ctxG, 1140, 2600, (pathProgress - 0.45) / 0.55, scrollMotion * 0.9, 0.82);
+        }
       }
-
-      ctx.restore();
     }
 
-    // --- COMPASS TARGET RETICLE WITH SCROLL-DRIVEN AZIMUTH TICKS ---
-    function drawCompassTargetReticle(ctx, x, y, color, scrollMotion) {
-      ctx.save();
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 12;
-      ctx.globalAlpha = 1.0;
-
-      // Outer Compass Ring
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      ctx.arc(x, y, 11.5, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Rotating Azimuth Ticks (Driven 100% by scrollMotion!)
-      ctx.lineWidth = 1.1;
-      for (let a = 0; a < Math.PI * 2; a += Math.PI / 2) {
-        const rotA = a + scrollMotion * 0.4;
-        const x1 = x + Math.cos(rotA) * 9;
-        const y1 = y + Math.sin(rotA) * 9;
-        const x2 = x + Math.cos(rotA) * 15;
-        const y2 = y + Math.sin(rotA) * 15;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-      }
-
-      // Center Core White & Color Dots
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(x, y, 4.5, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.arc(x, y, 7.5, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.restore();
-    }
-
-    // Spline Interpolation through Waypoints
-    function getSplinePoint(pts, u) {
-      if (pts.length < 2) return pts[0];
-      const n = pts.length - 1;
-      const idx = Math.min(n - 1, Math.floor(u * n));
-      const t = u * n - idx;
-
-      const p0 = pts[Math.max(0, idx - 1)];
-      const p1 = pts[idx];
-      const p2 = pts[Math.min(n, idx + 1)];
-      const p3 = pts[Math.min(n, idx + 2)];
-
-      // Catmull-Rom Spline Formula
-      const t2 = t * t;
-      const t3 = t2 * t;
-
-      return {
-        x: 0.5 * ((2 * p1.x) + (-p0.x + p2.x) * t + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3),
-        y: 0.5 * ((2 * p1.y) + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3)
-      };
-    }
-
-    function drawEpicycloidGear(ctx, cx, cy, R, r, p, rotAngle, color1, color2) {
-      ctx.save();
-      ctx.shadowColor = color1;
-      ctx.shadowBlur = 10;
-      ctx.lineWidth = 1.6;
-      ctx.strokeStyle = color1;
-      ctx.beginPath();
-      const points = 160;
-      for (let i = 0; i <= points; i++) {
-        const theta = (i / points) * Math.PI * 2 + rotAngle;
-        const x = cx + (R + r) * Math.cos(theta) - p * Math.cos(((R + r) / r) * theta);
-        const y = cy + (R + r) * Math.sin(theta) - p * Math.sin(((R + r) / r) * theta);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-
-      // Outer Pitch Circle with Degree Tick Marks
-      ctx.strokeStyle = color2;
-      ctx.shadowColor = color2;
-      ctx.lineWidth = 1.1;
-      ctx.setLineDash([3, 5]);
-      ctx.beginPath();
-      ctx.arc(cx, cy, R + 18, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Degree Ticks
-      ctx.setLineDash([]);
-      ctx.lineWidth = 1.2;
-      for (let deg = 0; deg < 360; deg += 30) {
-        const rad = (deg * Math.PI) / 180 + rotAngle * 0.5;
-        const x1 = cx + Math.cos(rad) * (R + 15);
-        const y1 = cy + Math.sin(rad) * (R + 15);
-        const x2 = cx + Math.cos(rad) * (R + 22);
-        const y2 = cy + Math.sin(rad) * (R + 22);
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-      }
-
-      ctx.restore();
-    }
-
-    function drawHUDNodeBadge(ctx, node) {
-      const { x, y, title, code, color, glow } = node;
-
-      ctx.save();
-      ctx.shadowColor = glow;
-      ctx.shadowBlur = 12;
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(x, y, 4, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2.0;
-      ctx.beginPath();
-      ctx.arc(x, y, 9, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Translucent Glassmorphic Badge Card
-      const cardW = 155;
-      const cardH = 40;
-      const cardX = x + 24;
-      const cardY = y - 20;
-
-      ctx.fillStyle = PALETTE.cardBg;
-      ctx.shadowColor = glow;
-      ctx.shadowBlur = 8;
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1.2;
-      roundRect(ctx, cardX, cardY, cardW, cardH, 6, true, true);
-
-      ctx.shadowBlur = 0;
-      ctx.font = 'bold 11px "Inter", monospace';
-      ctx.fillStyle = color;
-      ctx.fillText(title, cardX + 10, cardY + 16);
-
-      ctx.font = '9px "Inter", monospace';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-      ctx.fillText(code, cardX + 10, cardY + 30);
-
-      ctx.restore();
-    }
-
-    function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
-      ctx.beginPath();
-      ctx.moveTo(x + radius, y);
-      ctx.lineTo(x + width - radius, y);
-      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-      ctx.lineTo(x + width, y + height - radius);
-      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-      ctx.lineTo(x + radius, y + height);
-      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-      ctx.lineTo(x, y + radius);
-      ctx.quadraticCurveTo(x, y, x + radius, y);
-      ctx.closePath();
-      if (fill) ctx.fill();
-      if (stroke) ctx.stroke();
-    }
   }
 
   // ==========================================================================
