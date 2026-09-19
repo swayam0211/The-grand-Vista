@@ -340,51 +340,52 @@ document.addEventListener('DOMContentLoaded', () => {
   );
 
   // --- SCENE 4 PARALLAX: CITADEL ARCHITECTURE & CONTAINERLESS TYPOGRAPHY (Y: 3100 - 5200) ---
-  // 1. Building Cluster Mixed rises vertically with multi-layered depth parallax
+  // 1. Building Cluster Mixed (Background architecture layer with atmospheric depth)
   gsap.fromTo('#building-cluster-mixed',
-    { y: 140, scale: 0.94, opacity: 0.2 },
+    { y: 180, scale: 0.92, opacity: 0.15 },
     {
-      y: -40,
+      y: -30,
       scale: 1.02,
       opacity: 1.0,
       ease: 'power1.out',
       scrollTrigger: {
         trigger: mainTrigger,
         start: s(3100),
-        end: s(4300),
+        end: s(4400),
         scrub: 1.2,
       }
     }
   );
 
-  // 2. Building Cluster Large rises gracefully into view
+  // 2. Building Cluster Large (Foreground architecture layer with 3D scale entrance)
   gsap.fromTo('#building-cluster-large',
-    { y: 160, scale: 0.95, opacity: 0.2 },
+    { y: 220, scale: 0.92, opacity: 0.2 },
     {
-      y: -50,
-      scale: 1.04,
+      y: -80,
+      scale: 1.06,
       opacity: 1.0,
       ease: 'power2.out',
       scrollTrigger: {
         trigger: mainTrigger,
         start: s(3300),
-        end: s(4500),
-        scrub: 1.2,
+        end: s(4600),
+        scrub: 1.0,
       }
     }
   );
 
   // 3. Containerless Dark Brown Typography Float Reveal (Right Side Open Space)
   gsap.fromTo('#scene-4-text-block',
-    { y: 90, opacity: 0 },
+    { y: 110, x: 30, opacity: 0 },
     {
-      y: -30,
+      y: -20,
+      x: 0,
       opacity: 1.0,
       ease: 'power2.out',
       scrollTrigger: {
         trigger: mainTrigger,
         start: s(3400),
-        end: s(4300),
+        end: s(4400),
         scrub: 1.0,
       }
     }
@@ -1429,20 +1430,32 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // ScrollTrigger scrubs frame sequence bi-directionally based on scroll position (starts 0.5s/300px earlier)
+    let targetTrainFrame = 0;
+    let lerpTrainFrame = 0;
+
+    // ScrollTrigger scrubs frame sequence bi-directionally with lerp smoothing
     ScrollTrigger.create({
       trigger: mainTrigger,
       start: s(2300),
       end: s(3800),
       scrub: true,
       onUpdate: (self) => {
-        const frameIdx = Math.min(totalFrames - 1, Math.max(0, Math.floor(self.progress * (totalFrames - 1))));
-        if (frameIdx !== currentFrameIndex) {
-          currentFrameIndex = frameIdx;
-          renderTrainFrame(currentFrameIndex);
-        }
+        targetTrainFrame = self.progress * (totalFrames - 1);
       }
     });
+
+    function trainLoop() {
+      lerpTrainFrame += (targetTrainFrame - lerpTrainFrame) * 0.14;
+      const frameIdx = Math.min(totalFrames - 1, Math.max(0, Math.round(lerpTrainFrame)));
+
+      if (frameIdx !== currentFrameIndex) {
+        currentFrameIndex = frameIdx;
+        renderTrainFrame(currentFrameIndex);
+      }
+
+      requestAnimationFrame(trainLoop);
+    }
+    requestAnimationFrame(trainLoop);
 
     // Render initial frame on load
     if (trainFrames[0]) {
