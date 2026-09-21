@@ -4,7 +4,7 @@ import os
 from PIL import Image
 
 video_path = r'E:\once\new train.mp4'
-output_dir = r'E:\once\images from figma\train_frames'
+output_dir = r'E:\once\images\train_frames'
 os.makedirs(output_dir, exist_ok=True)
 
 cap = cv2.VideoCapture(video_path)

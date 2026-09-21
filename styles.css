@@ -279,15 +279,29 @@ body {
   text-shadow: 0 0 12px rgba(212, 175, 55, 0.9);
 }
 
-/* Responsive Scaling for Narrower Displays */
-@media (max-width: 1440px) {
-  .scroll-wrapper {
-    display: flex;
-    justify-content: center;
-  }
+/* Responsive Scaling for Narrower & Mobile Displays */
+.parallax-canvas {
+  transform-origin: top left !important;
+}
 
-  .parallax-canvas {
-    transform-origin: top center;
+@media (max-width: 600px) {
+  .scene-nav {
+    right: 8px;
+    gap: 10px;
+  }
+  .nav-dot {
+    width: 26px;
+    height: 26px;
+    font-size: 0.6rem;
+  }
+  .corner-depth {
+    right: 12px;
+    bottom: 14px;
+    padding: 6px 12px;
+  }
+  #scroll-percent {
+    font-size: 0.9rem;
+    min-width: 36px;
   }
 }
 

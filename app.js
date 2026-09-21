@@ -14,11 +14,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // 0. AUTOFIT SCREEN SCALING LOGIC
   // ==========================================================================
   let currentScale = 1;
+  let lastWidth = 0;
   const wrapper = document.querySelector('.scroll-wrapper');
 
   function updateScale() {
+    const newWidth = window.innerWidth;
+    if (newWidth === lastWidth && lastWidth !== 0) return;
+    lastWidth = newWidth;
+
     // Calculate scale factor to fit exactly 1440px wide canvas into current window width
-    currentScale = window.innerWidth / 1440;
+    currentScale = newWidth / 1440;
 
     // Set CSS variable for transform: scale()
     document.documentElement.style.setProperty('--scale', currentScale);
@@ -464,8 +469,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let sketchLoaded = false;
     let colorLoaded = false;
 
-    imgSketch.src = 'images from figma/section 5 sketch.png';
-    imgColor.src = 'images from figma/section 5 color.png';
+    imgSketch.src = 'images/section-5-sketch.png';
+    imgColor.src = 'images/section-5-color.png';
 
     imgSketch.onload = () => { sketchLoaded = true; checkAndDrawS5(); };
     imgColor.onload = () => { colorLoaded = true; checkAndDrawS5(); };
@@ -1471,7 +1476,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const img = new Image();
       const frameNum = String(i + 1).padStart(4, '0');
       img.decoding = 'async'; // Non-blocking decode
-      img.src = `images from figma/train_frames/frame_${frameNum}.webp`;
+      img.src = `images/train_frames/frame_${frameNum}.webp`;
       trainFrames[i] = img;
     }
 
