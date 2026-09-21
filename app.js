@@ -46,15 +46,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================================================
   // 1. LENIS SMOOTH SCROLL INITIALIZATION
   // ==========================================================================
+  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 768);
+
   const lenis = new Lenis({
-    duration: 2.4,
+    duration: isTouchDevice ? 1.2 : 2.4,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     orientation: 'vertical',
     gestureOrientation: 'vertical',
     smoothWheel: true,
     wheelMultiplier: 0.42,
-    touchMultiplier: 0.9,
-    lerp: 0.04, // Museum-grade smooth physics lerp
+    touchMultiplier: isTouchDevice ? 1.8 : 0.9,
+    lerp: isTouchDevice ? 0.09 : 0.04, // Museum-grade smooth physics lerp (responsive touch lerp)
+    syncTouch: true,
   });
 
   lenis.on('scroll', ScrollTrigger.update);
@@ -530,7 +533,25 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    let s5Running = false;
+    let s5RafId = null;
+
+    function startS5Loop() {
+      if (s5Running) return;
+      s5Running = true;
+      s5Loop();
+    }
+
+    function stopS5Loop() {
+      s5Running = false;
+      if (s5RafId) {
+        cancelAnimationFrame(s5RafId);
+        s5RafId = null;
+      }
+    }
+
     function s5Loop() {
+      if (!s5Running) return;
       s5LerpProgress += (s5TargetProgress - s5LerpProgress) * 0.08;
 
       // Exact Zero-Lag Viewport Pinning (Stays 100% stationary without any lerp lag or double-transform bugs!)
@@ -551,9 +572,20 @@ document.addEventListener('DOMContentLoaded', () => {
       s5Canvas.style.transform = `translateY(${targetPinY}px)`;
 
       checkAndDrawS5();
-      requestAnimationFrame(s5Loop);
+      s5RafId = requestAnimationFrame(s5Loop);
     }
-    requestAnimationFrame(s5Loop);
+
+    const s5Observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          startS5Loop();
+        } else {
+          stopS5Loop();
+        }
+      });
+    }, { rootMargin: '300px 0px 300px 0px' });
+    s5Observer.observe(s5Canvas);
+    startS5Loop();
 
     function checkAndDrawS5() {
       if (!sketchLoaded || !colorLoaded) return;
@@ -765,8 +797,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Dirty-flag system: track last drawn progress to skip identical redraws
     let geomLastDrawnProgress = -1;
 
+    let geomRunning = false;
+    let geomRafId = null;
+
+    function startGeomLoop() {
+      if (geomRunning) return;
+      geomRunning = true;
+      geomLoop();
+    }
+
+    function stopGeomLoop() {
+      geomRunning = false;
+      if (geomRafId) {
+        cancelAnimationFrame(geomRafId);
+        geomRafId = null;
+      }
+    }
+
     // 100% SCROLL-DRIVEN LOOP WITH LENIS LERP SMOOTHING (120 FPS Performance)
     function geomLoop() {
+      if (!geomRunning) return;
       geomLerpProgress += (geomTargetProgress - geomLerpProgress) * 0.14;
 
       // Only redraw if progress has meaningfully changed (saves ~40ms/frame when idle)
@@ -779,9 +829,20 @@ document.addEventListener('DOMContentLoaded', () => {
         drawMathematicalGeometry(drawProgress);
       }
 
-      requestAnimationFrame(geomLoop);
+      geomRafId = requestAnimationFrame(geomLoop);
     }
-    requestAnimationFrame(geomLoop);
+
+    const geomObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          startGeomLoop();
+        } else {
+          stopGeomLoop();
+        }
+      });
+    }, { rootMargin: '300px 0px 300px 0px' });
+    geomObserver.observe(geomCanvas);
+    startGeomLoop();
 
     // ------------------------------------------------------------------------
     // SACRED GEOMETRY: GOLDEN RATIO FIBONACCI BLUEPRINT & CELESTIAL STARDUST ENGINE
@@ -810,8 +871,9 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     }
 
+    const isMobileDevice = (window.innerWidth <= 768) || ('ontouchstart' in window);
     const splinePoints = [];
-    const stepsPerSeg = 80;
+    const stepsPerSeg = isMobileDevice ? 40 : 80;
     for (let i = 0; i < pathNodes.length - 1; i++) {
       const p0 = pathNodes[Math.max(0, i - 1)];
       const p1 = pathNodes[i];
@@ -827,7 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Pre-calculated Stardust Particle Array for Smooth 120 FPS Physics
     const stardustParticles = [];
-    const numStardust = 80;
+    const numStardust = isMobileDevice ? 35 : 80;
     for (let i = 0; i < numStardust; i++) {
       stardustParticles.push({
         angle: Math.random() * Math.PI * 2,
@@ -1388,7 +1450,10 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.width = 1440;
     canvas.height = 600;
 
-    const birds = Array.from({ length: 24 }, (_, idx) => {
+    const isMobileDevice = (window.innerWidth <= 768) || ('ontouchstart' in window);
+    const birdCount = isMobileDevice ? 12 : 24;
+
+    const birds = Array.from({ length: birdCount }, (_, idx) => {
       const type = idx % 4;
       return {
         id: idx,
@@ -1405,14 +1470,25 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     });
 
-    let birdsVisible = true; // Controlled by IntersectionObserver
+    let birdsRunning = false;
     let birdsRafId = null;
 
-    function drawBirds() {
-      if (!birdsVisible) {
-        birdsRafId = requestAnimationFrame(drawBirds);
-        return; // Skip draw when off-screen — saves CPU
+    function startBirdsLoop() {
+      if (birdsRunning) return;
+      birdsRunning = true;
+      drawBirds();
+    }
+
+    function stopBirdsLoop() {
+      birdsRunning = false;
+      if (birdsRafId) {
+        cancelAnimationFrame(birdsRafId);
+        birdsRafId = null;
       }
+    }
+
+    function drawBirds() {
+      if (!birdsRunning) return;
 
       ctxB.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -1436,14 +1512,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // IntersectionObserver: pause RAF when canvas is completely off screen
     const birdsObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        birdsVisible = entry.isIntersecting;
+        if (entry.isIntersecting) {
+          startBirdsLoop();
+        } else {
+          stopBirdsLoop();
+        }
       });
-    }, { rootMargin: '200px 0px 200px 0px', threshold: 0 });
+    }, { rootMargin: '300px 0px 300px 0px', threshold: 0 });
 
-    // Observe the scaled parallax canvas wrapper (birds canvas is inside transform)
-    // We observe the birds canvas element itself translated back to screen coords
     birdsObserver.observe(canvas);
-    drawBirds();
+    startBirdsLoop();
   }
 
   setupBirdsCanvas('birds-canvas-top');
@@ -1579,7 +1657,25 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    let trainRunning = false;
+    let trainRafId = null;
+
+    function startTrainLoop() {
+      if (trainRunning) return;
+      trainRunning = true;
+      trainLoop();
+    }
+
+    function stopTrainLoop() {
+      trainRunning = false;
+      if (trainRafId) {
+        cancelAnimationFrame(trainRafId);
+        trainRafId = null;
+      }
+    }
+
     function trainLoop() {
+      if (!trainRunning) return;
       lerpTrainFrame += (targetTrainFrame - lerpTrainFrame) * 0.14;
       const frameIdx = Math.min(totalFrames - 1, Math.max(0, Math.round(lerpTrainFrame)));
 
@@ -1588,9 +1684,20 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTrainFrame(currentFrameIndex);
       }
 
-      requestAnimationFrame(trainLoop);
+      trainRafId = requestAnimationFrame(trainLoop);
     }
-    requestAnimationFrame(trainLoop);
+
+    const trainObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          startTrainLoop();
+        } else {
+          stopTrainLoop();
+        }
+      });
+    }, { rootMargin: '300px 0px 300px 0px' });
+    trainObserver.observe(trainCanvas);
+    startTrainLoop();
 
     // Render initial frame when ready
     const firstFrame = trainFrames[0];

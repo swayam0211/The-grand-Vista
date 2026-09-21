@@ -410,3 +410,26 @@ body {
   height: 900px;
   display: block;
 }
+
+/* ==========================================================================
+   MOBILE HARDWARE GPU & RENDER OPTIMIZATIONS
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Eliminate expensive 100px blur box-shadow on 7100px container */
+  .parallax-canvas {
+    box-shadow: none !important;
+  }
+
+  /* Eliminate heavy multi-pass drop-shadow filters on full-screen canvas on mobile */
+  #geometry-canvas {
+    filter: none !important;
+  }
+
+  /* Replace heavy live GPU backdrop blur with solid high-opacity dark background on mobile HUD */
+  .corner-depth,
+  .nav-dot {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(18, 12, 4, 0.94) !important;
+  }
+}
